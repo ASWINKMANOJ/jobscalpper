@@ -1,0 +1,159 @@
+%-------------------------
+% Resume in Latex — DevOps / Cloud / Infrastructure Category
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage[scale=0.90,lf]{FiraMono}
+
+\definecolor{light-grey}{gray}{0.83}
+\definecolor{dark-grey}{gray}{0.3}
+\definecolor{text-grey}{gray}{.08}
+
+\DeclareRobustCommand{\ebseries}{\fontseries{eb}\selectfont}
+\DeclareTextFontCommand{\texteb}{\ebseries}
+
+\usepackage{contour}
+\usepackage[normalem]{ulem}
+\renewcommand{\ULdepth}{1.8pt}
+\contourlength{0.8pt}
+\newcommand{\myuline}[1]{%
+  \uline{\phantom{#1}}%
+  \llap{\contour{white}{#1}}%
+}
+
+\usepackage{tgheros}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{0in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+    \bfseries \vspace{2pt} \raggedright \large
+}{}{0em}{}[\color{light-grey} {\titlerule[2pt]} \vspace{-4pt}]
+
+\newcommand{\resumeItem}[1]{\item\small{{#1 \vspace{-1pt}}}}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & {\color{dark-grey}\small #2}\vspace{1pt}\\
+      \textit{#3} & {\color{dark-grey} \small #4}\\
+    \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      #1 & {\color{dark-grey}\small #2} \\
+    \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{0pt}}
+
+\color{text-grey}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\Huge ASWIN K M} \\ \vspace{5pt}
+    \small \faPhone* \texttt{+91 7907468285} \hspace{1pt} $|$
+    \hspace{1pt} \faEnvelope \hspace{2pt} \texttt{aswinkmanoj101@gmail.com} \hspace{1pt} $|$
+    \hspace{1pt} \faGithub \hspace{2pt} \href{https://github.com/ASWINKMANOJ}{\myuline {ASWINKMANOJ}} \hspace{1pt} $|$
+    \hspace{1pt} \faLinkedin \hspace{2pt} \href{https://linkedin.com/in/aswin-k-manoj}{\myuline {aswin-k-manoj}}
+    \\ \vspace{-3pt}
+\end{center}
+
+\section{OBJECTIVE}
+{\small Software engineering graduate targeting \textbf{DevOps / Cloud} roles, with hands-on experience deploying production systems on \textbf{AWS} with \textbf{Docker}, \textbf{Kubernetes}, and \textbf{CI/CD} pipelines. Built and operated cloud-native infrastructure handling \textbf{10,000+} concurrent connections and \textbf{5,000 RPS}, with Nginx load balancing and container orchestration.\par}
+\vspace{2pt}
+
+\section {EDUCATION}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Lovely Professional University}{Aug. 2022 -- May 2026}
+      {Bachelor of Technology in Computer Science}{Punjab, India}
+          \resumeItemListStart
+        \resumeItem {\textbf{Relevant Coursework}: Data Structures \& Algorithms, Object-Oriented Programming, System Design, Databases, Computer Systems, Computer Networks}
+        \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{PROJECTS}
+    \resumeSubHeadingListStart
+
+      \resumeProjectHeading
+          {\textbf{RideSync -- Cloud-Native Dispatch Engine} $|$ \emph{\textbf{Go}, \textbf{Docker}, \textbf{AWS}, PostgreSQL, Redis}}{\href{https://github.com/ASWINKMANOJ/RideSync}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Deployed a high-performance real-time backend on \textbf{AWS} using containerised \textbf{Docker} services, handling \textbf{10,000+} simultaneous WebSocket connections with sub-2ms ride-matching latency.}
+            \resumeItem{Designed an asynchronous batch-processing pipeline reducing SQL I/O overhead by \textbf{99.8\%}, with full observability via structured logging and health-check endpoints.}
+            \resumeItem{Managed the entire infrastructure lifecycle from local development to cloud deployment, maintaining zero-downtime service availability.}
+          \resumeItemListEnd
+
+        \resumeProjectHeading
+          {\textbf{SeatForge -- Microservices on Kubernetes} $|$ \emph{Spring Boot, \textbf{Kubernetes}, \textbf{Docker}, Kafka, PostgreSQL}}{\href{https://github.com/ASWINKMANOJ/SeatForge}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Migrated a monolithic reservation system to \textbf{microservices} and orchestrated deployment on \textbf{Kubernetes} behind an \textbf{Nginx} load balancer, achieving \textbf{3$\times$ throughput} and \textbf{5,000 RPS}.}
+            \resumeItem{Integrated \textbf{Kafka} for asynchronous event streaming and Redis caching to reduce database load by \textbf{65\%}, with monitoring and alerting for service health.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Skill India -- Laravel Course Management System} $|$ \emph{Laravel, PHP, MySQL}}{\href{https://github.com/ASWINKMANOJ/Skill-India-Laravel}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Built a dual-module course management platform with role-based authentication, CRUD operations, and an admin analytics dashboard over a centralized MySQL database.}
+          \resumeItemListEnd
+
+    \resumeSubHeadingListEnd
+
+\section{TECHNICAL SKILLS}
+ \begin{itemize}[leftmargin=0in, label={}]
+    \small{\item{
+     \textbf{Languages} {: Go (Golang), Python, Java, PHP, C/C++, JavaScript, SQL, NoSQL}\vspace{2pt} \\
+     \textbf{Backend Services} {: RESTful APIs, Spring Boot, Laravel, FastAPI, Node.js, MVC Architecture}\vspace{2pt} \\
+     \textbf{Architecture \& Design} {: \textbf{Microservices Architecture}, \textbf{Distributed Systems}, System Design, Low-Level Design (LLD)}\vspace{2pt} \\
+     \textbf{Infrastructure \& Cloud} {: \textbf{AWS}, \textbf{Docker}, \textbf{Kubernetes}, \textbf{CI/CD}, \textbf{Linux}, \textbf{Monitoring \& Logging}}\vspace{2pt} \\
+     \textbf{Databases \& Messaging} {: PostgreSQL, Redis, \textbf{Kafka}, MySQL, MongoDB, RabbitMQ}
+    }}
+ \end{itemize}
+
+\section{ACHIEVEMENTS \& CERTIFICATIONS}
+    \resumeItemListStart
+        \resumeItem{\textbf{LeetCode:} Solved \textbf{400+} problems (161 Easy, 190 Medium, 50 Hard) with an \textbf{82.86\%} acceptance rate; Global Ranking \textbf{1,700}.}
+        \resumeItem{\textbf{Standard Membership, Google Developer Program:} Active member utilizing enterprise tools to troubleshoot, debug, and optimize application code.}
+        \resumeItem{\textbf{Smart India Hackathon (SIH):} Ranked \textbf{Top 10} internally with a \textbf{97/100} evaluation score; showcased strong problem-solving skills in a highly collaborative environment.}
+        \resumeItem{\textbf{Certifications:} Cloud Computing (NPTEL), Blockchain Specialization (Coursera).}
+    \resumeItemListEnd
+
+\end{document}

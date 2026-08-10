@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}JobScalpper{% endblock %}</title>
+  <meta name="description" content="JobScalpper — Kerala IT Park job scraper and application manager">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">JobScalpper</span>
+    </div>
+
+    <p class="nav-section-label">Navigation</p>
+    <ul class="nav-links">
+      <li>
+        <a href="/" class="nav-link {% if active == 'dashboard' %}active{% endif %}">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="/jobs" class="nav-link {% if active == 'jobs' %}active{% endif %}">
+          <span class="nav-icon">🔍</span> Job Board
+        </a>
+      </li>
+      <li>
+        <a href="/applications" class="nav-link {% if active == 'applications' %}active{% endif %}">
+          <span class="nav-icon">📬</span> Applications
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button id="scrape-btn" class="btn btn-primary" style="width:100%;justify-content:center;"
+              onclick="triggerScrape()">
+        <span>⚡</span> Scrape Now
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script src="/static/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

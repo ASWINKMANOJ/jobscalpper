@@ -1,0 +1,30 @@
+.env
+*.db
+jobscalpper.db
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / React
+node_modules/
+web/frontend/node_modules/
+web/frontend/dist/
+
+# Application generated files
+applications/pending/
+applications/sent/
+out.json
+
+# Build & Logs
+*.aux
+*.log
+*.out
+bin/tectonic
+
+# OS & IDE
+.DS_Store
+.vscode/
+.idea/

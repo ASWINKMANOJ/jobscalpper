@@ -1,0 +1,160 @@
+%-------------------------
+% Resume in Latex — Backend Go / Golang Category
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage[scale=0.90,lf]{FiraMono}
+
+\definecolor{light-grey}{gray}{0.83}
+\definecolor{dark-grey}{gray}{0.3}
+\definecolor{text-grey}{gray}{.08}
+
+\DeclareRobustCommand{\ebseries}{\fontseries{eb}\selectfont}
+\DeclareTextFontCommand{\texteb}{\ebseries}
+
+\usepackage{contour}
+\usepackage[normalem]{ulem}
+\renewcommand{\ULdepth}{1.8pt}
+\contourlength{0.8pt}
+\newcommand{\myuline}[1]{%
+  \uline{\phantom{#1}}%
+  \llap{\contour{white}{#1}}%
+}
+
+\usepackage{tgheros}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{0in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+    \bfseries \vspace{2pt} \raggedright \large
+}{}{0em}{}[\color{light-grey} {\titlerule[2pt]} \vspace{-4pt}]
+
+\newcommand{\resumeItem}[1]{\item\small{{#1 \vspace{-1pt}}}}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & {\color{dark-grey}\small #2}\vspace{1pt}\\
+      \textit{#3} & {\color{dark-grey} \small #4}\\
+    \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      #1 & {\color{dark-grey}\small #2} \\
+    \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{0pt}}
+
+\color{text-grey}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\Huge ASWIN K M} \\ \vspace{5pt}
+    \small \faPhone* \texttt{+91 7907468285} \hspace{1pt} $|$
+    \hspace{1pt} \faEnvelope \hspace{2pt} \texttt{aswinkmanoj101@gmail.com} \hspace{1pt} $|$
+    \hspace{1pt} \faGithub \hspace{2pt} \href{https://github.com/ASWINKMANOJ}{\myuline {ASWINKMANOJ}} \hspace{1pt} $|$
+    \hspace{1pt} \faLinkedin \hspace{2pt} \href{https://linkedin.com/in/aswin-k-manoj}{\myuline {aswin-k-manoj}}
+    \\ \vspace{-3pt}
+\end{center}
+
+\section{OBJECTIVE}
+{\small Software engineering graduate targeting \textbf{Go / Golang Backend} roles, with demonstrated expertise in \textbf{Go (Golang)}, \textbf{PostgreSQL}, \textbf{Redis}, \textbf{Docker}, and \textbf{AWS}. Proven ability to build high-concurrency, low-latency distributed systems handling 10,000+ simultaneous connections at sub-millisecond latency.\par}
+\vspace{2pt}
+
+\section {EDUCATION}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Lovely Professional University}{Aug. 2022 -- May 2026}
+      {Bachelor of Technology in Computer Science}{Punjab, India}
+          \resumeItemListStart
+        \resumeItem {\textbf{Relevant Coursework}: Data Structures \& Algorithms, Object-Oriented Programming, System Design, Databases, Computer Systems, Computer Networks}
+        \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{PROJECTS}
+    \resumeSubHeadingListStart
+
+      \resumeProjectHeading
+          {\textbf{RideSync -- Real-Time Spatial Dispatch Engine} $|$ \emph{\textbf{Go}, \textbf{PostgreSQL}, \textbf{Redis}, \textbf{Docker}, \textbf{AWS}}}{\href{https://github.com/ASWINKMANOJ/RideSync}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Architected a high-performance real-time ride-hailing backend in \textbf{Go}, taking full ownership of the Low-Level Design (LLD) and system architecture to dynamically match users in \textbf{$<$2ms}.}
+            \resumeItem{Designed and optimized a highly concurrent full-duplex WebSocket pipeline using \textbf{Go channels}, sustaining \textbf{10,000+} simultaneous telemetry streams without data race conditions.}
+            \resumeItem{Reduced SQL database I/O overhead by \textbf{99.8\%} by building asynchronous background workers for batch processing; deployed the entire service stack on \textbf{AWS} with \textbf{Docker} containers.}
+          \resumeItemListEnd
+
+        \resumeProjectHeading
+          {\textbf{SeatForge -- Distributed Seat Reservation System} $|$ \emph{Spring Boot, PostgreSQL, Kafka, Kubernetes}}{\href{https://github.com/ASWINKMANOJ/SeatForge}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Built and maintained a distributed system for seat reservations, guaranteeing strict data consistency and fault tolerance in high-concurrency transactions to prevent double-booking.}
+            \resumeItem{Migrated architecture to microservices and deployed via Docker and Kubernetes behind an Nginx load balancer, achieving \textbf{3$\times$ throughput} and sustaining \textbf{5,000 RPS}.}
+            \resumeItem{Optimized backend performance by integrating \textbf{Redis} caching and a Kafka messaging queue, reducing database load by \textbf{65\%} and eliminating N+1 query bottlenecks.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Skill India -- Laravel Course Management System} $|$ \emph{Laravel, PHP, MySQL}}{\href{https://github.com/ASWINKMANOJ/Skill-India-Laravel}{\faGithub\ GitHub}}
+          \resumeItemListStart
+            \resumeItem{Built a dual-module course management platform with Laravel, implementing role-based authentication, CRUD operations, and an admin analytics dashboard over a centralized MySQL database.}
+          \resumeItemListEnd
+
+    \resumeSubHeadingListEnd
+
+\section{TECHNICAL SKILLS}
+ \begin{itemize}[leftmargin=0in, label={}]
+    \small{\item{
+     \textbf{Languages} {: \textbf{Go (Golang)}, PHP, Java, Python, C/C++, JavaScript, SQL, NoSQL}\vspace{2pt} \\
+     \textbf{Backend Services} {: \textbf{RESTful APIs}, Laravel, MVC Architecture, Spring Boot, FastAPI, Node.js}\vspace{2pt} \\
+     \textbf{Architecture \& Design} {: \textbf{Low-Level Design (LLD)}, \textbf{System Design}, \textbf{Distributed Systems}, Microservices Architecture}\vspace{2pt} \\
+     \textbf{Infrastructure \& Cloud} {: \textbf{AWS}, \textbf{Docker}, Kubernetes, CI/CD, Linux, Monitoring \& Logging}\vspace{2pt} \\
+     \textbf{Databases \& Messaging} {: \textbf{PostgreSQL}, \textbf{Redis}, MySQL, MongoDB, Kafka, RabbitMQ}
+    }}
+ \end{itemize}
+
+\section{ACHIEVEMENTS \& CERTIFICATIONS}
+    \resumeItemListStart
+        \resumeItem{\textbf{LeetCode:} Solved \textbf{400+} problems (161 Easy, 190 Medium, 50 Hard) with an \textbf{82.86\%} acceptance rate; Global Ranking \textbf{1,700}.}
+        \resumeItem{\textbf{Standard Membership, Google Developer Program:} Active member utilizing enterprise tools to troubleshoot, debug, and optimize application code.}
+        \resumeItem{\textbf{Smart India Hackathon (SIH):} Ranked \textbf{Top 10} internally with a \textbf{97/100} evaluation score; showcased strong problem-solving skills in a highly collaborative environment.}
+        \resumeItem{\textbf{Certifications:} Cloud Computing (NPTEL), Blockchain Specialization (Coursera).}
+    \resumeItemListEnd
+
+\end{document}
