@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import time
 from urllib.parse import quote, urljoin, urlparse
 
 import requests
@@ -329,6 +330,8 @@ def scrape_technopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MA
             jobs.append({"Park": park_name, "Title": title_text, "URL": link})
 
         page += 1
+        if page <= pages_needed:
+            time.sleep(0.5)  # rate-limit: be polite to the server
 
     return _dedupe_jobs(jobs)
 
@@ -370,19 +373,23 @@ def scrape_infopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MAX_
             empty_streak = 0
 
         page += 1
+        if page <= pages_needed:
+            time.sleep(0.5)  # rate-limit: be polite to the server
 
     return _dedupe_jobs(jobs)
 
 
-def scrape_portal(park_name, url, session=None):
+def scrape_portal(park_name, url, session=None, min_pages=MIN_PAGES, max_pages=MAX_PAGES):
     log.info("Scraping %s...", park_name)
     http = session or requests
 
     try:
         if "technopark.in" in url:
-            return scrape_technopark(park_name, session=http)
+            return scrape_technopark(park_name, session=http,
+                                     min_pages=min_pages, max_pages=max_pages)
         if "infopark.in" in url:
-            return scrape_infopark(park_name, session=http)
+            return scrape_infopark(park_name, session=http,
+                                   min_pages=min_pages, max_pages=max_pages)
 
         response = http.get(url, headers=HEADERS, timeout=15)
         response.raise_for_status()
@@ -404,7 +411,8 @@ def write_jobs_json(jobs, output_filename=OUTPUT_FILENAME):
     return output_filename
 
 
-def main(portals=None, output_filename=OUTPUT_FILENAME, session=None):
+def main(portals=None, output_filename=OUTPUT_FILENAME, session=None,
+         min_pages=MIN_PAGES, max_pages=MAX_PAGES):
     if _DB_AVAILABLE:
         init_db()
 
@@ -412,7 +420,8 @@ def main(portals=None, output_filename=OUTPUT_FILENAME, session=None):
     all_matched_jobs = []
 
     for name, url in portals.items():
-        matched_jobs = scrape_portal(name, url, session=session)
+        matched_jobs = scrape_portal(name, url, session=session,
+                                     min_pages=min_pages, max_pages=max_pages)
         all_matched_jobs.extend(matched_jobs)
 
         # Persist to DB (hash-based dedup)

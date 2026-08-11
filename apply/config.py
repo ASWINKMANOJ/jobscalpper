@@ -18,6 +18,10 @@ GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 APPLICANT_NAME = os.getenv("APPLICANT_NAME", "")
 
+# Resume filename pattern: resume/{RESUME_PREFIX}_{category}.pdf
+# Defaults to "aswin" for backward compatibility. Set in .env to customise.
+RESUME_PREFIX = os.getenv("RESUME_PREFIX", "aswin")
+
 # Ignore park-wide / generic inboxes that are not hiring contacts.
 EMAIL_BLOCKLIST = {
     "info@infopark.in",

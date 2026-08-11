@@ -243,21 +243,26 @@ def get_application(app_id: str) -> dict | None:
 
 def set_status(app_ids: list[str], status: str) -> list[dict]:
     """Update status (and the matching timestamp) for a list of application IDs."""
-    stamp_key = {
-        "approved": "approved_at",
-        "rejected": "rejected_at",
-        "sent":     "sent_at",
-        "pending":  "created_at",
-    }.get(status)
+    _VALID_STATUSES = {"pending", "approved", "rejected", "sent"}
+    if status not in _VALID_STATUSES:
+        raise ValueError(f"Invalid status {status!r}; must be one of {_VALID_STATUSES}")
+
+    # Map status → (SQL template, needs timestamp param).
+    # Column names are literal strings here — never interpolated from user input.
+    _STATUS_SQL = {
+        "approved": ("UPDATE applications SET status = ?, approved_at = ? WHERE id = ?", True),
+        "rejected": ("UPDATE applications SET status = ?, rejected_at = ? WHERE id = ?", True),
+        "sent":     ("UPDATE applications SET status = ?, sent_at = ? WHERE id = ?",     True),
+        "pending":  ("UPDATE applications SET status = ?, created_at = ? WHERE id = ?",  True),
+    }
+
+    sql, needs_ts = _STATUS_SQL[status]
     now = _now()
     updated: list[dict] = []
     with _conn() as con:
         for app_id in app_ids:
-            if stamp_key:
-                con.execute(
-                    f"UPDATE applications SET status = ?, {stamp_key} = ? WHERE id = ?",
-                    (status, now, app_id),
-                )
+            if needs_ts:
+                con.execute(sql, (status, now, app_id))
             else:
                 con.execute(
                     "UPDATE applications SET status = ? WHERE id = ?",

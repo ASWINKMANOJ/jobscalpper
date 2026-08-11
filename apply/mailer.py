@@ -13,7 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
-from .config import APPLICANT_NAME, GMAIL_ADDRESS, GMAIL_APP_PASSWORD, RESUME_DIR
+from .config import APPLICANT_NAME, GMAIL_ADDRESS, GMAIL_APP_PASSWORD, RESUME_DIR, RESUME_PREFIX
 from .cover import build_cover_letter  # noqa: F401 – re-exported for convenience
 
 
@@ -22,12 +22,12 @@ def _resolve_pdf(item: dict) -> Path:
     Return the best PDF to attach for this application.
 
     Priority:
-      1. resume/aswin_{category}.pdf  (user-provided, category-specific)
+      1. resume/{RESUME_PREFIX}_{category}.pdf  (user-provided, category-specific)
       2. item['pdf_path']             (compiled tailored PDF)
     """
     category = (item.get("category") or "").strip()
     if category:
-        candidate = RESUME_DIR / f"aswin_{category}.pdf"
+        candidate = RESUME_DIR / f"{RESUME_PREFIX}_{category}.pdf"
         if candidate.exists():
             return candidate
 
@@ -37,7 +37,7 @@ def _resolve_pdf(item: dict) -> Path:
 
     raise RuntimeError(
         f"No PDF found for application {item.get('id')}. "
-        f"Expected resume/aswin_{category}.pdf or a compiled pdf_path."
+        f"Expected resume/{RESUME_PREFIX}_{category}.pdf or a compiled pdf_path."
     )
 
 

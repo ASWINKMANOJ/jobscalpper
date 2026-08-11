@@ -76,6 +76,7 @@ function OnboardingGuide() {
 export default function Settings() {
   const [config, setConfig] = useState({})
   const [form, setForm]     = useState({})
+  const [scrapePages, setScrapePages] = useState(15)
   const [loading, setLoading]   = useState(true)
   const [saving, setSaving]     = useState(false)
   const [testing, setTesting]   = useState(false)
@@ -90,6 +91,7 @@ export default function Settings() {
       const d = await r.json()
       setConfig(d)
       setHasCredentials(d.has_credentials || false)
+      setScrapePages(parseInt(d.SCRAPE_PAGES, 10) || 15)
       // Initialise form — clear password placeholder
       const f = {}
       FIELDS.forEach(field => {
@@ -109,10 +111,11 @@ export default function Settings() {
     setSaving(true)
     setTestResult(null)
     try {
+      const payload = { ...form, SCRAPE_PAGES: String(scrapePages) }
       const r = await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const d = await r.json()
       if (d.ok) {
@@ -222,6 +225,72 @@ export default function Settings() {
                   title={!hasCredentials ? 'Save credentials first' : 'Test SMTP connection'}
                 >
                   {testing ? <><div className="spinner" /> Testing…</> : 'Test Connection'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Scraper Settings */}
+          <div className="divider" />
+          <div className="settings-section">
+            <div className="settings-title">Scraper Settings</div>
+            <p className="settings-desc">
+              Control how deeply the scraper crawls each IT park portal.
+            </p>
+
+            <div className="settings-card">
+              <div className="input-group">
+                <label className="input-label" htmlFor="scrape-pages">Pages to Scrape</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <input
+                    id="scrape-pages"
+                    type="range"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={scrapePages}
+                    onChange={e => setScrapePages(parseInt(e.target.value, 10))}
+                    style={{
+                      flex: 1,
+                      height: 4,
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      background: `linear-gradient(to right, var(--text-muted) ${(scrapePages - 1) / 99 * 100}%, var(--border) ${(scrapePages - 1) / 99 * 100}%)`,
+                      borderRadius: 99,
+                      outline: 'none',
+                      cursor: 'pointer',
+                    }}
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={scrapePages}
+                    onChange={e => {
+                      const v = parseInt(e.target.value, 10)
+                      if (!isNaN(v)) setScrapePages(Math.max(1, Math.min(100, v)))
+                    }}
+                    className="input"
+                    style={{ width: 72, textAlign: 'center' }}
+                  />
+                </div>
+                <p style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 4 }}>
+                  Number of pages to fetch from each portal per scan.
+                  Higher values find more jobs but take longer.
+                  {scrapePages <= 5 && <span style={{ color: 'var(--pending)' }}> — Quick scan</span>}
+                  {scrapePages > 5 && scrapePages <= 20 && <span style={{ color: 'var(--approved)' }}> — Balanced (recommended)</span>}
+                  {scrapePages > 20 && scrapePages <= 50 && <span style={{ color: 'var(--sent)' }}> — Deep scan</span>}
+                  {scrapePages > 50 && <span style={{ color: 'var(--rejected)' }}> — Exhaustive (may be slow)</span>}
+                </p>
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? <><div className="spinner" style={{ borderTopColor: 'var(--bg)' }} /> Saving…</> : 'Save Configuration'}
                 </button>
               </div>
             </div>

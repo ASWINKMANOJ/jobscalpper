@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '../components/Toast.jsx'
 
@@ -169,7 +169,7 @@ export default function Applications() {
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
-  const load = useCallback(async (status = tab) => {
+  const load = async (status = tab) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -183,7 +183,7 @@ export default function Applications() {
     } finally {
       setLoading(false)
     }
-  }, [tab])
+  }
 
   useEffect(() => { load() }, [tab])
 

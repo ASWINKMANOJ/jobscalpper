@@ -26,6 +26,7 @@ from .config import (
     APPLICANT_NAME,
     PENDING_DIR,
     RESUME_DIR,
+    RESUME_PREFIX,
     RESUME_TEMPLATE,
     SENT_DIR,
 )
@@ -102,7 +103,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         category = detect_category(title, description)
 
         # ── Resolve PDF ───────────────────────────────────────────────────
-        category_pdf = RESUME_DIR / f"aswin_{category}.pdf"
+        category_pdf = RESUME_DIR / f"{RESUME_PREFIX}_{category}.pdf"
         if category_pdf.exists():
             # Use the user-provided, category-specific PDF directly.
             pdf_path = str(category_pdf)
@@ -129,7 +130,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
             )
             try:
                 compiled  = compile_pdf(tex_file, app_dir)
-                final_pdf = app_dir / "Aswin_KM_Resume.pdf"
+                final_pdf = app_dir / f"{APPLICANT_NAME.replace(' ', '_')}_Resume.pdf"
                 if compiled != final_pdf:
                     shutil.copy2(compiled, final_pdf)
                 pdf_path = str(final_pdf)

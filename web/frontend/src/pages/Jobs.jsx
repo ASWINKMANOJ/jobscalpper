@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useToast } from '../components/Toast.jsx'
 
@@ -21,7 +21,7 @@ export default function Jobs() {
   const [searchInput, setSearchInput] = useState('')
   const toast = useToast()
 
-  const load = useCallback(async (p = 1, q = search, pk = park) => {
+  const load = async (p = 1, q = search, pk = park) => {
     setLoading(true)
     try {
       const params = new URLSearchParams({ page: p, per_page: 50 })
@@ -36,7 +36,7 @@ export default function Jobs() {
     } finally {
       setLoading(false)
     }
-  }, [search, park])
+  }
 
   useEffect(() => { load(1) }, [])
 

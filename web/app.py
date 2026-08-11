@@ -1,10 +1,11 @@
 """web/app.py — Flask JSON API for JobScalpper React SPA."""
 
-import io
 import logging
 import os
 import sys
+import tempfile
 import threading
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -21,6 +22,22 @@ app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
 CORS(app)  # Allow Vite dev server to reach Flask
 
 ENV_PATH = _ROOT / ".env"
+LOG_DIR = _ROOT / "logs"
+
+# ── File logging ──────────────────────────────────────────────────────────
+LOG_DIR.mkdir(exist_ok=True)
+_file_handler = RotatingFileHandler(
+    LOG_DIR / "jobscalpper.log",
+    maxBytes=2 * 1024 * 1024,  # 2 MB per file
+    backupCount=3,
+    encoding="utf-8",
+)
+_file_handler.setFormatter(logging.Formatter(
+    "%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+))
+logging.getLogger("jobscalpper").addHandler(_file_handler)
+logging.getLogger("jobscalpper").setLevel(logging.INFO)
 
 # ── One-time DB init (lazy) ───────────────────────────────────────────────
 _db_initialized = False
@@ -42,6 +59,8 @@ def _ensure_db():
 _scrape_status: dict = {"running": False, "message": "Idle", "log": []}
 _scrape_lock = threading.Lock()
 
+_MAX_LOG_LINES = 500  # prevent unbounded memory growth
+
 
 class _LogCapture(logging.Handler):
     """Logging handler that appends records to the scrape log list."""
@@ -50,13 +69,18 @@ class _LogCapture(logging.Handler):
         msg = self.format(record)
         if msg.strip():
             with _scrape_lock:
-                _scrape_status.setdefault("log", []).append(msg)
+                log_list = _scrape_status.setdefault("log", [])
+                log_list.append(msg)
+                # Ring-buffer: drop oldest lines when cap is exceeded
+                if len(log_list) > _MAX_LOG_LINES:
+                    del log_list[: len(log_list) - _MAX_LOG_LINES]
 
 
 def _run_scrape() -> None:
-    global _scrape_status
+    # Mutate in-place (thread-safe); never reassign _scrape_status itself.
     with _scrape_lock:
-        _scrape_status = {"running": True, "message": "Scraping portals…", "log": ["Starting scrape..."]}
+        _scrape_status.clear()
+        _scrape_status.update({"running": True, "message": "Scraping portals…", "log": ["Starting scrape..."]})
 
     # Attach a handler to capture scraper log output
     scrape_logger = logging.getLogger("jobscalpper")
@@ -67,7 +91,13 @@ def _run_scrape() -> None:
 
     try:
         from job_scalpper import main as _scrape_main
-        jobs = _scrape_main()
+
+        # Read configurable page count from .env
+        env = _read_env()
+        scrape_pages = int(env.get("SCRAPE_PAGES", "15") or "15")
+        scrape_pages = max(1, min(scrape_pages, 100))  # clamp to sane range
+
+        jobs = _scrape_main(min_pages=scrape_pages, max_pages=max(scrape_pages, 40))
         count = len(jobs) if jobs else 0
         with _scrape_lock:
             _scrape_status["running"] = False
@@ -197,6 +227,8 @@ def api_scrape():
 def api_scrape_status():
     with _scrape_lock:
         status_copy = dict(_scrape_status)
+        # Deep-copy the log list to avoid mutation during serialisation
+        status_copy["log"] = list(_scrape_status.get("log", []))
     return jsonify(status_copy)
 
 
@@ -215,14 +247,25 @@ def _read_env() -> dict:
 
 
 def _write_env(data: dict) -> None:
-    """Write key-value pairs to .env file."""
-    lines = []
-    for k, v in data.items():
-        lines.append(f"{k}={v}")
-    ENV_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    """Write key-value pairs to .env file atomically (temp + rename)."""
+    content = "\n".join(f"{k}={v}" for k, v in data.items()) + "\n"
+    # Write to a temp file in the same directory, then atomically replace.
+    fd, tmp_path = tempfile.mkstemp(dir=str(ENV_PATH.parent), suffix=".env.tmp")
+    try:
+        os.write(fd, content.encode("utf-8"))
+        os.close(fd)
+        os.replace(tmp_path, str(ENV_PATH))
+    except Exception:
+        os.close(fd) if not os.get_inheritable(fd) else None
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 
-KNOWN_CONFIG_KEYS = ["GMAIL_ADDRESS", "GMAIL_APP_PASSWORD", "APPLICANT_NAME"]
+KNOWN_CONFIG_KEYS = [
+    "GMAIL_ADDRESS", "GMAIL_APP_PASSWORD", "APPLICANT_NAME",
+    "SCRAPE_PAGES", "RESUME_PREFIX",
+]
 
 
 @app.route("/api/config", methods=["GET"])

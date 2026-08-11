@@ -210,19 +210,6 @@ def build_objective(title: str, company: str, skills: list[str]) -> str:
     )
 
 
-def reorder_projects(tex: str, skills: list[str]) -> str:
-    """Move the project whose stack best matches JD skills to the top."""
-    focus = _normalize(" ".join(skills))
-    project_scores = [
-        ("Skill India", sum(k in focus for k in ("laravel", "php", "mysql"))),
-        ("RideSync", sum(k in focus for k in ("go", "golang", "redis", "docker", "aws", "postgres"))),
-        ("SeatForge", sum(k in focus for k in ("spring", "java", "kafka", "kubernetes", "docker"))),
-    ]
-    project_scores.sort(key=lambda item: item[1], reverse=True)
-    # Soft signal only; keep original order unless a clear winner exists.
-    return tex
-
-
 def _replace_marker_block(tex: str, start: str, end: str, content: str) -> str:
     start_idx = tex.find(start)
     end_idx = tex.find(end)
@@ -256,7 +243,6 @@ def tailor_resume(
         "% <<SKILLS_END>>",
         f"% <<SKILLS_START>>\n{skills_block}\n% <<SKILLS_END>>",
     )
-    tex = reorder_projects(tex, skills)
     return tex, skills
 
 
