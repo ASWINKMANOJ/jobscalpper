@@ -12,12 +12,11 @@ RESUME_DIR = ROOT / "resume"
 APPLICATIONS_DIR = ROOT / "applications"
 PENDING_DIR = APPLICATIONS_DIR / "pending"
 SENT_DIR = APPLICATIONS_DIR / "sent"
-QUEUE_PATH = APPLICATIONS_DIR / "queue.json"  # kept for backward compat
 DB_PATH = ROOT / "jobscalpper.db"
 
-GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS", "aswinkmanoj101@gmail.com")
+GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
-APPLICANT_NAME = os.getenv("APPLICANT_NAME", "Aswin K M")
+APPLICANT_NAME = os.getenv("APPLICANT_NAME", "")
 
 # Ignore park-wide / generic inboxes that are not hiring contacts.
 EMAIL_BLOCKLIST = {

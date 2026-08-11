@@ -28,3 +28,7 @@ bin/tectonic
 .DS_Store
 .vscode/
 .idea/
+
+# Setuptools / pip editable install
+*.egg-info/
+build/

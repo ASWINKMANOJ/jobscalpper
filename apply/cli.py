@@ -21,6 +21,7 @@ from pathlib import Path
 import requests
 
 import db.store as store
+from db.store import make_application_id
 from .config import (
     APPLICANT_NAME,
     PENDING_DIR,
@@ -31,7 +32,6 @@ from .config import (
 from .jd import fetch_job_details
 from .mailer import send_application_email
 from .pdf import compile_pdf
-from .queue import make_application_id   # slug helper (unchanged)
 from .tailor import detect_category, matched_skills, write_tailored_tex
 from .cover import build_cover_letter
 

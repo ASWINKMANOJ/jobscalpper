@@ -1,9 +1,12 @@
 import json
+import logging
 import re
 from urllib.parse import quote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
+log = logging.getLogger("jobscalpper")
 
 try:
     from db.store import init_db, upsert_job as _db_upsert_job
@@ -300,7 +303,7 @@ def scrape_technopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MA
     pages_needed = min_pages
 
     while page <= pages_needed and page <= max_pages:
-        print(f"  page {page}/{pages_needed}...")
+        log.info("  page %d/%d...", page, pages_needed)
         response = http.get(
             TECHNOPARK_JOBS_API,
             params={"page": page, "search": "", "type": ""},
@@ -339,7 +342,7 @@ def scrape_infopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MAX_
     empty_streak = 0
 
     while page <= pages_needed and page <= max_pages:
-        print(f"  page {page}/{pages_needed}...")
+        log.info("  page %d/%d...", page, pages_needed)
         response = http.get(
             INFOPARK_JOBS_URL,
             params={"page": page},
@@ -372,7 +375,7 @@ def scrape_infopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MAX_
 
 
 def scrape_portal(park_name, url, session=None):
-    print(f"Scraping {park_name}...")
+    log.info("Scraping %s...", park_name)
     http = session or requests
 
     try:
@@ -390,7 +393,7 @@ def scrape_portal(park_name, url, session=None):
         return extract_jobs_from_html(html, park_name, url)
 
     except (requests.exceptions.RequestException, ValueError, KeyError) as e:
-        print(f"Error fetching data from {park_name}: {e}")
+        log.error("Error fetching data from %s: %s", park_name, e)
         return []
 
 
@@ -417,24 +420,28 @@ def main(portals=None, output_filename=OUTPUT_FILENAME, session=None):
             for job in matched_jobs:
                 _db_upsert_job(job["Park"], job["Title"], job["URL"])
 
-        print(f"Found {len(matched_jobs)} suitable roles at {name}.\n")
+        log.info("Found %d suitable roles at %s.", len(matched_jobs), name)
 
     write_jobs_json(all_matched_jobs, output_filename)
 
     if not all_matched_jobs:
-        print(f"No exact matches found today. Wrote empty list to '{output_filename}'.")
+        log.info("No exact matches found today. Wrote empty list to '%s'.", output_filename)
         return []
 
-    print("-" * 60)
+    log.info("-" * 60)
     for idx, job in enumerate(all_matched_jobs, start=1):
-        print(f"{idx}. {job['Title']}")
-        print(f"   Location: {job['Park']}")
-        print(f"   Link:     {job['URL']}")
-        print("-" * 60)
+        log.info("%d. %s", idx, job["Title"])
+        log.info("   Location: %s", job["Park"])
+        log.info("   Link:     %s", job["URL"])
+        log.info("-" * 60)
 
-    print(f"Success! Refreshed '{output_filename}' with {len(all_matched_jobs)} jobs.")
+    log.info("Success! Refreshed '%s' with %d jobs.", output_filename, len(all_matched_jobs))
     return all_matched_jobs
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
     main()

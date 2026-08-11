@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jobscalpper"
+version = "1.0.0"
+description = "Automated job scraper & application manager for Kerala IT Parks"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.0",
+    "beautifulsoup4>=4.12.0",
+    "python-dotenv>=1.0.0",
+    "flask>=3.0.0",
+    "flask-cors>=6.0.0",
+]
+
+[project.scripts]
+jobscalpper = "cli_entry:main"
+
+[tool.setuptools]
+py-modules = ["cli_entry", "job_scalpper"]
+packages = ["db", "apply", "web"]

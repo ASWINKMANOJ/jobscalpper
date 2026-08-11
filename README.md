@@ -34,15 +34,16 @@ JobScalpper watches job boards across **Infopark**, **Technopark**, and **Cyberp
 
 ```
 jobscalpper/
+├── cli_entry.py           # Single-command launcher (jobscalpper up|scrape|…)
+├── pyproject.toml         # Package config — registers `jobscalpper` command
 ├── job_scalpper.py        # Core scraper — scrapes all three IT park portals
 ├── apply/
-│   ├── cli.py             # CLI entry point
+│   ├── cli.py             # Application pipeline CLI (prepare/list/approve/send)
 │   ├── config.py          # Env config and paths
 │   ├── cover.py           # Cover letter generator
 │   ├── jd.py              # Job description parser
 │   ├── mailer.py          # Gmail SMTP sender
 │   ├── pdf.py             # PDF compilation via Tectonic
-│   ├── queue.py           # Application queue manager
 │   └── tailor.py          # Resume tailoring logic
 ├── db/
 │   ├── schema.sql         # SQLite schema
@@ -69,14 +70,14 @@ jobscalpper/
 
 ## Quick Start
 
-### 1. Clone and set up Python environment
+### 1. Clone and set up
 
 ```bash
 git clone https://github.com/your-username/jobscalpper.git
 cd jobscalpper
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e .                # installs deps + registers `jobscalpper` command
 ```
 
 ### 2. Configure credentials
@@ -100,24 +101,25 @@ APPLICANT_NAME=Your Name
 
 You can also manage credentials through the **Settings** page in the web dashboard.
 
-### 3. Start the Flask API
+### 3. Launch everything
 
 ```bash
-source venv/bin/activate
-python web/app.py
-# Running at http://localhost:5000
+jobscalpper up
 ```
 
-### 4. Start the React frontend (dev mode)
-
-```bash
-cd web/frontend
-npm install
-npm run dev
-# Running at http://localhost:5173
-```
+That's it! This starts both the Flask API (`:5000`) and the Vite dev server (`:5173`).
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+#### Other commands
+
+```bash
+jobscalpper up --prod     # Build frontend → serve through Flask on :5000
+jobscalpper scrape        # Run scraper only (no servers)
+jobscalpper prepare       # Prepare applications from new scraped jobs
+jobscalpper status        # Show DB stats (jobs, pending, approved, sent)
+```
+
 
 ---
 
@@ -157,11 +159,21 @@ The Flask backend exposes a REST JSON API at `http://localhost:5000`:
 ## CLI Usage
 
 ```bash
-# Scrape job portals and store results
-python -m apply
+# Start everything (API + dashboard)
+jobscalpper up
 
-# Or run the scraper directly
-python job_scalpper.py
+# Scrape job portals and store results
+jobscalpper scrape
+
+# Prepare applications from new scraped jobs
+jobscalpper prepare
+
+# Check database stats
+jobscalpper status
+
+# Or run modules directly
+python job_scalpper.py          # scraper only
+python -m apply prepare         # application pipeline
 ```
 
 ---
@@ -171,11 +183,9 @@ python job_scalpper.py
 To serve the React app through Flask directly (single server):
 
 ```bash
-cd web/frontend
-npm run build          # Outputs to web/frontend/dist/
-cd ../..
-python web/app.py      # Serves SPA at http://localhost:5000
+jobscalpper up --prod          # Builds frontend + serves at http://localhost:5000
 ```
+
 
 ---
 

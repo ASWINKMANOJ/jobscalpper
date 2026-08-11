@@ -1,5 +1,7 @@
 """web/app.py — Flask JSON API for JobScalpper React SPA."""
 
+import io
+import logging
 import os
 import sys
 import threading
@@ -20,32 +22,64 @@ CORS(app)  # Allow Vite dev server to reach Flask
 
 ENV_PATH = _ROOT / ".env"
 
+# ── One-time DB init (lazy) ───────────────────────────────────────────────
+_db_initialized = False
+_db_init_lock = threading.Lock()
+
+
+@app.before_request
+def _ensure_db():
+    global _db_initialized
+    if _db_initialized:
+        return
+    with _db_init_lock:
+        if not _db_initialized:
+            store.init_db()
+            _db_initialized = True
+
+
 # ── Scrape state ──────────────────────────────────────────────────────────
 _scrape_status: dict = {"running": False, "message": "Idle", "log": []}
 _scrape_lock = threading.Lock()
+
+
+class _LogCapture(logging.Handler):
+    """Logging handler that appends records to the scrape log list."""
+
+    def emit(self, record):
+        msg = self.format(record)
+        if msg.strip():
+            with _scrape_lock:
+                _scrape_status.setdefault("log", []).append(msg)
 
 
 def _run_scrape() -> None:
     global _scrape_status
     with _scrape_lock:
         _scrape_status = {"running": True, "message": "Scraping portals…", "log": ["Starting scrape..."]}
+
+    # Attach a handler to capture scraper log output
+    scrape_logger = logging.getLogger("jobscalpper")
+    handler = _LogCapture()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    scrape_logger.addHandler(handler)
+    scrape_logger.setLevel(logging.INFO)
+
     try:
         from job_scalpper import main as _scrape_main
         jobs = _scrape_main()
         count = len(jobs) if jobs else 0
         with _scrape_lock:
-            _scrape_status = {
-                "running": False,
-                "message": f"Done — {count} jobs found.",
-                "log": _scrape_status.get("log", []) + [f"Completed. {count} jobs found."],
-            }
+            _scrape_status["running"] = False
+            _scrape_status["message"] = f"Done — {count} jobs found."
+            _scrape_status["log"].append(f"Completed. {count} jobs found.")
     except Exception as exc:
         with _scrape_lock:
-            _scrape_status = {
-                "running": False,
-                "message": f"Error: {exc}",
-                "log": _scrape_status.get("log", []) + [f"Error: {exc}"],
-            }
+            _scrape_status["running"] = False
+            _scrape_status["message"] = f"Error: {exc}"
+            _scrape_status["log"].append(f"Error: {exc}")
+    finally:
+        scrape_logger.removeHandler(handler)
 
 
 # ── SPA catch-all (serve React app) ──────────────────────────────────────
@@ -66,7 +100,6 @@ def serve_spa(path):
 
 @app.route("/api/stats")
 def api_stats():
-    store.init_db()
     return jsonify(store.get_stats())
 
 
@@ -74,7 +107,6 @@ def api_stats():
 
 @app.route("/api/jobs")
 def api_jobs():
-    store.init_db()
     page        = request.args.get("page", 1, type=int)
     park_filter = request.args.get("park", "")
     search      = request.args.get("q", "")
@@ -100,19 +132,14 @@ def api_jobs():
 
 @app.route("/api/applications")
 def api_applications():
-    store.init_db()
     status_filter = request.args.get("status", "")
     apps = store.load_applications(status=status_filter or None)
-    counts = {
-        s: len(store.load_applications(status=s))
-        for s in ("pending", "approved", "sent", "rejected")
-    }
+    counts = store.get_application_counts()
     return jsonify({"applications": apps, "counts": counts})
 
 
 @app.route("/api/applications/<app_id>/approve", methods=["POST"])
 def api_approve(app_id: str):
-    store.init_db()
     updated = store.set_status([app_id], "approved")
     if not updated:
         return jsonify({"ok": False, "error": "Not found"}), 404
@@ -121,7 +148,6 @@ def api_approve(app_id: str):
 
 @app.route("/api/applications/<app_id>/reject", methods=["POST"])
 def api_reject(app_id: str):
-    store.init_db()
     updated = store.set_status([app_id], "rejected")
     if not updated:
         return jsonify({"ok": False, "error": "Not found"}), 404
@@ -130,7 +156,6 @@ def api_reject(app_id: str):
 
 @app.route("/api/applications/<app_id>/send", methods=["POST"])
 def api_send(app_id: str):
-    store.init_db()
     data    = request.get_json(silent=True) or {}
     dry_run = bool(data.get("dry_run", False))
     item    = store.get_application(app_id)
@@ -150,7 +175,6 @@ def api_send(app_id: str):
 
 @app.route("/api/applications/<app_id>/cover_letter")
 def api_cover_letter(app_id: str):
-    store.init_db()
     item = store.get_application(app_id)
     if not item:
         return jsonify({"ok": False, "error": "Not found"}), 404
@@ -161,8 +185,9 @@ def api_cover_letter(app_id: str):
 
 @app.route("/api/scrape", methods=["POST"])
 def api_scrape():
-    if _scrape_status["running"]:
-        return jsonify({"ok": False, "message": "Scrape already running"}), 409
+    with _scrape_lock:
+        if _scrape_status["running"]:
+            return jsonify({"ok": False, "message": "Scrape already running"}), 409
     t = threading.Thread(target=_run_scrape, daemon=True)
     t.start()
     return jsonify({"ok": True, "message": "Scrape started"})
@@ -170,7 +195,9 @@ def api_scrape():
 
 @app.route("/api/scrape/status")
 def api_scrape_status():
-    return jsonify(_scrape_status)
+    with _scrape_lock:
+        status_copy = dict(_scrape_status)
+    return jsonify(status_copy)
 
 
 # ── API: Config (.env management) ─────────────────────────────────────────
@@ -246,4 +273,5 @@ def api_config_test():
 
 if __name__ == "__main__":
     store.init_db()
+    _db_initialized = True
     app.run(debug=True, host="0.0.0.0", port=5000)

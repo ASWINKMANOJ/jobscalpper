@@ -11,6 +11,8 @@ from .store import (
     get_application,
     set_status,
     get_stats,
+    get_application_counts,
+    make_application_id,
 )
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
     "get_application",
     "set_status",
     "get_stats",
+    "get_application_counts",
+    "make_application_id",
 ]

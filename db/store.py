@@ -8,10 +8,12 @@ Re-scraping the same URL only increments seen_count; it never creates a duplicat
 
 import hashlib
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 _ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = _ROOT / "jobscalpper.db"
@@ -306,3 +308,40 @@ def get_stats() -> dict:
         "sent":          sent,
         "rejected":      rejected,
     }
+
+
+# ---------------------------------------------------------------------------
+# Application counts (single query)
+# ---------------------------------------------------------------------------
+
+def get_application_counts() -> dict:
+    """Return status counts in a single GROUP BY query."""
+    counts = {"pending": 0, "approved": 0, "sent": 0, "rejected": 0}
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT status, COUNT(*) FROM applications GROUP BY status"
+        ).fetchall()
+    for row in rows:
+        if row[0] in counts:
+            counts[row[0]] = row[1]
+    return counts
+
+
+# ---------------------------------------------------------------------------
+# Application ID helper (moved from apply/queue.py)
+# ---------------------------------------------------------------------------
+
+def make_application_id(park: str, url: str) -> str:
+    """Generate a stable, slug-style application ID from park + URL."""
+    slug = re.sub(r"[^a-z0-9]+", "-", park.lower()).strip("-")[:16]
+    for pattern in (
+        r"/job-details/(\d+)",
+        r"/company-jobs/details/\d+/(\d+)",
+        r"job_id=(\d+)",
+        r"/(\d+)/?$",
+    ):
+        match = re.search(pattern, url)
+        if match:
+            return f"{slug}-{match.group(1)}"
+    tail = re.sub(r"[^a-zA-Z0-9]+", "-", urlparse(url).path)[-36:].strip("-")
+    return f"{slug}-{tail or 'job'}"
