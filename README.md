@@ -1,8 +1,8 @@
-# JobScalpper
+# JobScraper
 
 > Automated job scraper, application manager, and email sender for Kerala IT Parks — with a React dashboard.
 
-JobScalpper watches job boards across **Infopark**, **Technopark**, and **Cyberpark**, filters postings by your skill set, tailors your resume and cover letter for each role, and sends applications via Gmail — all from a clean web dashboard.
+JobScraper watches job boards across **Infopark**, **Technopark**, and **Cyberpark**, filters postings by your skill set, tailors your resume and cover letter for each role, and sends applications via Gmail — all from a clean web dashboard.
 
 ---
 
@@ -35,10 +35,11 @@ JobScalpper watches job boards across **Infopark**, **Technopark**, and **Cyberp
 ## Project Structure
 
 ```
-jobscalpper/
-├── cli_entry.py           # Single-command launcher (jobscalpper up|scrape|…)
-├── pyproject.toml         # Package config — registers `jobscalpper` command
-├── job_scalpper.py        # Core scraper — scrapes all three IT park portals
+jobscraper/
+├── cli_entry.py           # Single-command launcher (jobscraper up|scrape|…)
+├── pyproject.toml         # Package config — registers `jobscraper` command
+├── job_scraper.py         # Core scraper — scrapes all three IT park portals
+├── job_scalpper.py        # Legacy compatibility wrapper
 ├── apply/
 │   ├── cli.py             # Application pipeline CLI (prepare/list/approve/send)
 │   ├── config.py          # Env config and paths
@@ -77,11 +78,11 @@ jobscalpper/
 ### 1. Clone and set up
 
 ```bash
-git clone https://github.com/your-username/jobscalpper.git
-cd jobscalpper
+git clone https://github.com/your-username/jobscraper.git
+cd jobscraper
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -e .                # installs deps + registers `jobscalpper` command
+pip install -e .                # installs deps + registers `jobscraper` command
 ```
 
 ### 2. Configure credentials & settings
@@ -103,14 +104,14 @@ SCRAPE_PAGES=15                         # Default pages to scrape per portal
 > **Getting a Gmail App Password:**
 > 1. Enable 2-Step Verification on your Google account
 > 2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-> 3. Create an app password for "JobScalpper" and paste the 16-character code above
+> 3. Create an app password for "JobScraper" and paste the 16-character code above
 
 You can also manage credentials and scraper depth through the **Settings** page in the web dashboard.
 
 ### 3. Launch everything
 
 ```bash
-jobscalpper up
+jobscraper up
 ```
 
 That's it! This starts both the Flask API (`:5000`) and the Vite dev server (`:5173`).
@@ -120,10 +121,10 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 #### Other commands
 
 ```bash
-jobscalpper up --prod     # Build frontend → serve through Flask on :5000
-jobscalpper scrape        # Run scraper only (no servers)
-jobscalpper prepare       # Prepare applications from new scraped jobs
-jobscalpper status        # Show DB stats (jobs, pending, approved, sent)
+jobscraper up --prod     # Build frontend → serve through Flask on :5000
+jobscraper scrape        # Run scraper only (no servers)
+jobscraper prepare       # Prepare applications from new scraped jobs
+jobscraper status        # Show DB stats (jobs, pending, approved, sent)
 ```
 
 ---
@@ -165,19 +166,19 @@ The Flask backend exposes a REST JSON API at `http://localhost:5000`:
 
 ```bash
 # Start everything (API + dashboard)
-jobscalpper up
+jobscraper up
 
 # Scrape job portals and store results
-jobscalpper scrape
+jobscraper scrape
 
 # Prepare applications from new scraped jobs
-jobscalpper prepare
+jobscraper prepare
 
 # Check database stats
-jobscalpper status
+jobscraper status
 
 # Or run modules directly
-python job_scalpper.py          # scraper only
+python job_scraper.py           # scraper only
 python -m apply prepare         # application pipeline
 ```
 
@@ -188,7 +189,7 @@ python -m apply prepare         # application pipeline
 To serve the React app through Flask directly (single server):
 
 ```bash
-jobscalpper up --prod          # Builds frontend + serves at http://localhost:5000
+jobscraper up --prod          # Builds frontend + serves at http://localhost:5000
 ```
 
 ---
