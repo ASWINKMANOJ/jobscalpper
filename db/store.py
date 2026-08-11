@@ -16,7 +16,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 _ROOT = Path(__file__).resolve().parent.parent
-DB_PATH = _ROOT / "jobscalpper.db"
+DB_PATH = _ROOT / "jobscraper.db"
+if not DB_PATH.exists() and (_ROOT / "jobscalpper.db").exists():
+    DB_PATH = _ROOT / "jobscalpper.db"
 _SCHEMA = Path(__file__).parent / "schema.sql"
 
 

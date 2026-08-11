@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import requests
 
-from job_scalpper import (
+from job_scraper import (
     check_match,
     extract_infopark_jobs,
     extract_jobs_from_html,
@@ -343,7 +343,7 @@ class TestMain(unittest.TestCase):
         portals = {"Infopark (Kochi)": "https://infopark.in/companies-job"}
         fake_file = mock_open()
 
-        with patch("job_scalpper.scrape_infopark") as mocked_scrape:
+        with patch("job_scraper.scrape_infopark") as mocked_scrape:
             mocked_scrape.return_value = [
                 {
                     "Park": "Infopark (Kochi)",
@@ -368,7 +368,7 @@ class TestMain(unittest.TestCase):
         session.get.return_value = response
 
         fake_file = mock_open()
-        with patch("job_scalpper.scrape_infopark", return_value=[]):
+        with patch("job_scraper.scrape_infopark", return_value=[]):
             with patch("builtins.open", fake_file):
                 jobs = main(
                     portals={"Infopark (Kochi)": "https://infopark.in/companies-job"},

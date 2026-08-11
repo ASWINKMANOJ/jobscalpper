@@ -94,7 +94,7 @@ export default function App() {
             <div className="logo-mark">
               {icons.bolt}
             </div>
-            <span className="logo-name">JobScalpper</span>
+            <span className="logo-name">JobScraper</span>
           </div>
 
           <p className="nav-section">Menu</p>

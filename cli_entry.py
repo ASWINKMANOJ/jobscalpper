@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-cli_entry.py — Single-command launcher for JobScalpper.
+cli_entry.py — Single-command launcher for JobScraper.
 
 Usage:
-    jobscalpper up            Start Flask API + Vite dev server
-    jobscalpper up --prod     Build frontend and serve through Flask only
-    jobscalpper scrape        Run job scraper
-    jobscalpper prepare       Prepare applications from new scraped jobs
-    jobscalpper status        Show DB stats
+    jobscraper up            Start Flask API + Vite dev server
+    jobscraper up --prod     Build frontend and serve through Flask only
+    jobscraper scrape        Run job scraper
+    jobscraper prepare       Prepare applications from new scraped jobs
+    jobscraper status        Show DB stats
 """
 
 import argparse
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent
 VENV_PYTHON = ROOT / "venv" / "bin" / "python"
 FRONTEND_DIR = ROOT / "web" / "frontend"
 
-log = logging.getLogger("jobscalpper.cli")
+log = logging.getLogger("jobscraper.cli")
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ def cmd_up(args: argparse.Namespace) -> int:
         )
         log.info("")
         log.info("╔══════════════════════════════════════════════════╗")
-        log.info("║  JobScalpper (production)                       ║")
+        log.info("║  JobScraper (production)                        ║")
         log.info("║  → http://localhost:5000                        ║")
         log.info("║  Press Ctrl+C to stop                           ║")
         log.info("╚══════════════════════════════════════════════════╝")
@@ -101,7 +101,7 @@ def cmd_up(args: argparse.Namespace) -> int:
 
     log.info("")
     log.info("╔══════════════════════════════════════════════════╗")
-    log.info("║  JobScalpper (dev mode)                         ║")
+    log.info("║  JobScraper (dev mode)                          ║")
     log.info("║  → API:       http://localhost:5000              ║")
     log.info("║  → Dashboard: http://localhost:5173              ║")
     log.info("║  Press Ctrl+C to stop both servers               ║")
@@ -137,7 +137,10 @@ def cmd_scrape(args: argparse.Namespace) -> int:
     """Run the job scraper."""
     # Import here so we only load dependencies when needed
     sys.path.insert(0, str(ROOT))
-    from job_scalpper import main as scrape_main
+    try:
+        from job_scraper import main as scrape_main
+    except ImportError:
+        from job_scalpper import main as scrape_main
     scrape_main()
     return 0
 
@@ -163,7 +166,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 
     print("")
     print("╔══════════════════════════════════════════════════╗")
-    print("║  JobScalpper — Status                           ║")
+    print("║  JobScraper — Status                            ║")
     print("╠══════════════════════════════════════════════════╣")
     print(f"║  Total jobs scraped:  {stats['total_jobs']:<26}║")
     print(f"║  New (no application):{stats['new_jobs']:<26}║")
@@ -184,8 +187,8 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="jobscalpper",
-        description="JobScalpper — Automated job scraper & application manager for Kerala IT Parks",
+        prog="jobscraper",
+        description="JobScraper — Automated job scraper & application manager for Kerala IT Parks",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

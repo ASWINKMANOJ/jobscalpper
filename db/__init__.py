@@ -1,4 +1,4 @@
-"""Database package for jobscalpper."""
+"""Database package for jobscraper."""
 from .store import (
     init_db,
     job_hash,

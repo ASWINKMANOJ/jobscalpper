@@ -12,7 +12,9 @@ RESUME_DIR = ROOT / "resume"
 APPLICATIONS_DIR = ROOT / "applications"
 PENDING_DIR = APPLICATIONS_DIR / "pending"
 SENT_DIR = APPLICATIONS_DIR / "sent"
-DB_PATH = ROOT / "jobscalpper.db"
+DB_PATH = ROOT / "jobscraper.db"
+if not DB_PATH.exists() and (ROOT / "jobscalpper.db").exists():
+    DB_PATH = ROOT / "jobscalpper.db"
 
 GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")

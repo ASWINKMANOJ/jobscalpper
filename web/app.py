@@ -27,7 +27,7 @@ LOG_DIR = _ROOT / "logs"
 # ── File logging ──────────────────────────────────────────────────────────
 LOG_DIR.mkdir(exist_ok=True)
 _file_handler = RotatingFileHandler(
-    LOG_DIR / "jobscalpper.log",
+    LOG_DIR / "jobscraper.log",
     maxBytes=2 * 1024 * 1024,  # 2 MB per file
     backupCount=3,
     encoding="utf-8",
@@ -36,8 +36,8 @@ _file_handler.setFormatter(logging.Formatter(
     "%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 ))
-logging.getLogger("jobscalpper").addHandler(_file_handler)
-logging.getLogger("jobscalpper").setLevel(logging.INFO)
+logging.getLogger("jobscraper").addHandler(_file_handler)
+logging.getLogger("jobscraper").setLevel(logging.INFO)
 
 # ── One-time DB init (lazy) ───────────────────────────────────────────────
 _db_initialized = False
@@ -82,15 +82,19 @@ def _run_scrape() -> None:
         _scrape_status.clear()
         _scrape_status.update({"running": True, "message": "Scraping portals…", "log": ["Starting scrape..."]})
 
-    # Attach a handler to capture scraper log output
-    scrape_logger = logging.getLogger("jobscalpper")
+    # Attach handlers to capture scraper log output (both jobscraper and jobscalpper)
+    scrape_loggers = [logging.getLogger("jobscraper"), logging.getLogger("jobscalpper")]
     handler = _LogCapture()
     handler.setFormatter(logging.Formatter("%(message)s"))
-    scrape_logger.addHandler(handler)
-    scrape_logger.setLevel(logging.INFO)
+    for lgr in scrape_loggers:
+        lgr.addHandler(handler)
+        lgr.setLevel(logging.INFO)
 
     try:
-        from job_scalpper import main as _scrape_main
+        try:
+            from job_scraper import main as _scrape_main
+        except ImportError:
+            from job_scalpper import main as _scrape_main
 
         # Read configurable page count from .env
         env = _read_env()
@@ -109,7 +113,8 @@ def _run_scrape() -> None:
             _scrape_status["message"] = f"Error: {exc}"
             _scrape_status["log"].append(f"Error: {exc}")
     finally:
-        scrape_logger.removeHandler(handler)
+        for lgr in scrape_loggers:
+            lgr.removeHandler(handler)
 
 
 # ── SPA catch-all (serve React app) ──────────────────────────────────────

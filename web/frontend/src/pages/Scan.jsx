@@ -108,7 +108,7 @@ export default function Scan() {
           <div className="terminal-dot terminal-dot-amber" />
           <div className="terminal-dot terminal-dot-green" />
           <span className="terminal-title" style={{ marginLeft: 8 }}>
-            jobscalpper — scraper output
+            jobscraper — scraper output
           </span>
           {status.running && (
             <div className="spinner" style={{ marginLeft: 'auto', width: 12, height: 12, borderWidth: 1.5 }} />

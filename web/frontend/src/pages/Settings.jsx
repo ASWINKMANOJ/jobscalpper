@@ -52,7 +52,7 @@ function OnboardingGuide() {
           {
             n: 3,
             title: 'Create an App Password',
-            body: <>Visit{' '}<a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">myaccount.google.com/apppasswords</a>, set App name to <code>JobScalpper</code>, and click <strong>Create</strong>. Copy the 16-character password shown.</>,
+            body: <>Visit{' '}<a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">myaccount.google.com/apppasswords</a>, set App name to <code>JobScraper</code>, and click <strong>Create</strong>. Copy the 16-character password shown.</>,
           },
           {
             n: 4,
@@ -303,7 +303,7 @@ export default function Settings() {
             <div className="settings-card">
               <div style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
                 <p style={{ marginBottom: 10 }}>
-                  <strong>JobScalpper</strong> scrapes job postings from Kerala IT park portals (Infopark, Technopark, Cyberpark), 
+                  <strong>JobScraper</strong> scrapes job postings from Kerala IT park portals (Infopark, Technopark, Cyberpark),  
                   tailors your resume and cover letter, and sends job applications automatically via Gmail.
                 </p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>

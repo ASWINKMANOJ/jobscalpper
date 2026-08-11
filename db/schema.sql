@@ -1,4 +1,4 @@
--- JobScalpper SQLite Schema
+-- JobScraper SQLite Schema
 -- Hash-based deduplication: job identity = SHA256(park|url)[:16]
 
 CREATE TABLE IF NOT EXISTS jobs (
