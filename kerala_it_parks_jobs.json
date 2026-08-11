@@ -71,11 +71,6 @@
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "Web Developer",
-        "URL": "https://technopark.in/job-details/32057?job=Web%20Developer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
         "Title": "Frontend Developer (Angular and React)",
         "URL": "https://technopark.in/job-details/32036?job=Frontend%20Developer%20%28Angular%20and%20React%29"
     },
@@ -258,11 +253,6 @@
         "Park": "Infopark (Kochi)",
         "Title": "Backend Developer (.NET Core)",
         "URL": "https://infopark.in/company-jobs/details/529/24788"
-    },
-    {
-        "Park": "Infopark (Kochi)",
-        "Title": "Web Developer",
-        "URL": "https://infopark.in/company-jobs/details/85/24759"
     },
     {
         "Park": "Infopark (Kochi)",

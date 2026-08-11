@@ -32,3 +32,5 @@ bin/tectonic
 # Setuptools / pip editable install
 *.egg-info/
 build/
+
+kerala_it_parks_jobs.json
