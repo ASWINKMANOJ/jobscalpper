@@ -1,13 +1,68 @@
 [
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "Hiring DevOps Engineer (3-5 years exp)",
-        "URL": "https://technopark.in/job-details/32164?job=Hiring%20DevOps%20Engineer%20%283-5%20years%20exp%29"
+        "Title": "Oracle Integration Cloud (OIC) Developer",
+        "URL": "https://technopark.in/job-details/32347?job=Oracle%20Integration%20Cloud%20%28OIC%29%20Developer"
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "Fullstack Developer (MERN)- Immediate(7 to 10 years)",
-        "URL": "https://technopark.in/job-details/32163?job=Fullstack%20Developer%20%28MERN%29-%20Immediate%287%20to%2010%20years%29"
+        "Title": "Hiring DevOps Engineer (3-5 years exp)",
+        "URL": "https://technopark.in/job-details/32333?job=Hiring%20DevOps%20Engineer%20%283-5%20years%20exp%29"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "PHP Developer – WordPress",
+        "URL": "https://technopark.in/job-details/32302?job=PHP%20Developer%20%E2%80%93%20WordPress"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Full Stack Java Developer (3+ Years Experience)",
+        "URL": "https://technopark.in/job-details/32291?job=Full%20Stack%20Java%20Developer%20%283%2B%20Years%20Experience%29"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Angular Developer",
+        "URL": "https://technopark.in/job-details/32288?job=Angular%20Developer"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Python Developer Intern",
+        "URL": "https://technopark.in/job-details/32287?job=Python%20Developer%20Intern"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Junior DevOps Engineer || 0.5 - 2yrs exp",
+        "URL": "https://technopark.in/job-details/32285?job=Junior%20DevOps%20Engineer%20%7C%7C%200.5%20-%202yrs%20exp"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Full Stack Developer - Python",
+        "URL": "https://technopark.in/job-details/32277?job=Full%20Stack%20Developer%20-%20Python"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Front End Developer-Angular",
+        "URL": "https://technopark.in/job-details/32244?job=Front%20End%20Developer-Angular"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "MERN STACK TRAINEE",
+        "URL": "https://technopark.in/job-details/32236?job=MERN%20STACK%20TRAINEE"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": ".NET Developer (C#, WPF, WCF) - Immediate Joiners",
+        "URL": "https://technopark.in/job-details/32214?job=.NET%20Developer%20%28C%23%2C%20WPF%2C%20WCF%29%20-%20Immediate%20Joiners"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Full Stack Developer (React & Java )",
+        "URL": "https://technopark.in/job-details/32211?job=Full%20Stack%20Developer%20%28React%20%26%20Java%20%29"
+    },
+    {
+        "Park": "Technopark (Trivandrum)",
+        "Title": "Web Developer",
+        "URL": "https://technopark.in/job-details/32204?job=Web%20Developer"
     },
     {
         "Park": "Technopark (Trivandrum)",
@@ -21,23 +76,8 @@
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "Java Fullstack Developer",
-        "URL": "https://technopark.in/job-details/32150?job=Java%20Fullstack%20Developer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
         "Title": ".NET Web Developer Intern (Remote)",
         "URL": "https://technopark.in/job-details/32147?job=.NET%20Web%20Developer%20Intern%20%28Remote%29"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "Full Stack Production Support Engineer",
-        "URL": "https://technopark.in/job-details/32146?job=Full%20Stack%20Production%20Support%20Engineer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "Angular Developer",
-        "URL": "https://technopark.in/job-details/32131?job=Angular%20Developer"
     },
     {
         "Park": "Technopark (Trivandrum)",
@@ -106,11 +146,6 @@
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "DevOps Engineer",
-        "URL": "https://technopark.in/job-details/31819?job=DevOps%20Engineer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
         "Title": "Front-End Developer Intern (Freshers)",
         "URL": "https://technopark.in/job-details/31807?job=Front-End%20Developer%20Intern%20%28Freshers%29"
     },
@@ -131,11 +166,6 @@
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "DevOps Engineer",
-        "URL": "https://technopark.in/job-details/31492?job=DevOps%20Engineer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
         "Title": "Legacy Systems Migration Specialist (AS400 to Cloud)",
         "URL": "https://technopark.in/job-details/31429?job=Legacy%20Systems%20Migration%20Specialist%20%28AS400%20to%20Cloud%29"
     },
@@ -146,33 +176,23 @@
     },
     {
         "Park": "Technopark (Trivandrum)",
-        "Title": "Managed Kubernetes Administrator",
-        "URL": "https://technopark.in/job-details/31361?job=Managed%20Kubernetes%20Administrator"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "Python Developer",
-        "URL": "https://technopark.in/job-details/31342?job=Python%20Developer"
-    },
-    {
-        "Park": "Technopark (Trivandrum)",
         "Title": "Embedded Software Engineer (ESE-1)",
         "URL": "https://technopark.in/job-details/31298?job=Embedded%20Software%20Engineer%20%28ESE-1%29"
     },
     {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "Python Developer- GRC",
-        "URL": "https://technopark.in/job-details/31156?job=Python%20Developer-%20GRC"
+        "Park": "Infopark (Kochi)",
+        "Title": "DevOps Engineer",
+        "URL": "https://infopark.in/company-jobs/details/118/25119"
     },
     {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "React Frontend",
-        "URL": "https://technopark.in/job-details/31152?job=React%20Frontend"
+        "Park": "Infopark (Kochi)",
+        "Title": "Python- Nest Js, React Fullstack Engineer",
+        "URL": "https://infopark.in/company-jobs/details/378/25109"
     },
     {
-        "Park": "Technopark (Trivandrum)",
-        "Title": "Java Backend",
-        "URL": "https://technopark.in/job-details/31151?job=Java%20Backend"
+        "Park": "Infopark (Kochi)",
+        "Title": "Software Engineer",
+        "URL": "https://infopark.in/company-jobs/details/70/25087"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -191,18 +211,13 @@
     },
     {
         "Park": "Infopark (Kochi)",
-        "Title": "Fullstack Developer",
+        "Title": "Fullstack Developer (React+Python)",
         "URL": "https://infopark.in/company-jobs/details/59/24990"
     },
     {
         "Park": "Infopark (Kochi)",
         "Title": "Backend Developer / Laravel Developer (Immediate Hiring)",
         "URL": "https://infopark.in/company-jobs/details/262/24976"
-    },
-    {
-        "Park": "Infopark (Kochi)",
-        "Title": "DevOps Engineer",
-        "URL": "https://infopark.in/company-jobs/details/118/24974"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -213,11 +228,6 @@
         "Park": "Infopark (Kochi)",
         "Title": "Full Stack Developer",
         "URL": "https://infopark.in/company-jobs/details/421/24940"
-    },
-    {
-        "Park": "Infopark (Kochi)",
-        "Title": "Associate Backend Developer",
-        "URL": "https://infopark.in/company-jobs/details/420/24903"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -256,6 +266,11 @@
     },
     {
         "Park": "Infopark (Kochi)",
+        "Title": "Web Developer",
+        "URL": "https://infopark.in/company-jobs/details/85/24759"
+    },
+    {
+        "Park": "Infopark (Kochi)",
         "Title": "Node.js Full Stack Engineer",
         "URL": "https://infopark.in/company-jobs/details/378/24732"
     },
@@ -268,6 +283,11 @@
         "Park": "Infopark (Kochi)",
         "Title": "Full Stack Developer",
         "URL": "https://infopark.in/company-jobs/details/352/23667"
+    },
+    {
+        "Park": "Infopark (Kochi)",
+        "Title": "React/Node.js Developer with Solution Architecture experience",
+        "URL": "https://infopark.in/company-jobs/details/28/23478"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -296,13 +316,18 @@
     },
     {
         "Park": "Infopark (Kochi)",
-        "Title": "Web Developer (INTERN)",
-        "URL": "https://infopark.in/company-jobs/details/476/21472"
+        "Title": "MERN Fullstack developer",
+        "URL": "https://infopark.in/company-jobs/details/91/22335"
     },
     {
         "Park": "Infopark (Kochi)",
-        "Title": "Full Stack Developer (Next.js & Node.js) - 1+ Years",
-        "URL": "https://infopark.in/company-jobs/details/399/21440"
+        "Title": "Full Stack Developer",
+        "URL": "https://infopark.in/company-jobs/details/286/21736"
+    },
+    {
+        "Park": "Infopark (Kochi)",
+        "Title": "Web Developer (INTERN)",
+        "URL": "https://infopark.in/company-jobs/details/476/21472"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -326,8 +351,8 @@
     },
     {
         "Park": "Infopark (Kochi)",
-        "Title": "Junior Python Developer (Django)",
-        "URL": "https://infopark.in/company-jobs/details/148/20523"
+        "Title": "Jr. Python developer",
+        "URL": "https://infopark.in/company-jobs/details/368/19950"
     },
     {
         "Park": "Infopark (Kochi)",
@@ -336,8 +361,8 @@
     },
     {
         "Park": "Infopark (Kochi)",
-        "Title": "Business Development Executive – Cloud Services( Kochi  )",
-        "URL": "https://infopark.in/company-jobs/details/95/15907"
+        "Title": "Web Developer (React Preferred)",
+        "URL": "https://infopark.in/company-jobs/details/383/19475"
     },
     {
         "Park": "UL Cyberpark (Kozhikode)",

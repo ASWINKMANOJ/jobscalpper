@@ -61,9 +61,12 @@ _DEFAULT_HIGHLIGHT = _PROJECT_HIGHLIGHTS["backend_php"]
 # ---------------------------------------------------------------------------
 
 _PARK_LINES: dict[str, str] = {
-    "technopark":  "I came across this opening on the Technopark (Trivandrum) portal",
-    "infopark":    "I found this opportunity listed on the Infopark (Kochi) job board",
-    "ulcyberpark": "I noticed this role on the UL Cyberpark (Kozhikode) careers portal",
+    "technopark":           "I came across this opening on the Technopark (Trivandrum) portal",
+    "infopark (thrissur)":   "I found this opportunity listed on the Infopark (Thrissur) job board",
+    "infopark (cherthala)":  "I found this opportunity listed on the Infopark (Cherthala) job board",
+    "infopark":             "I found this opportunity listed on the Infopark (Kochi) job board",
+    "ulcyberpark":          "I noticed this role on the UL Cyberpark (Kozhikode) careers portal",
+    "cyberpark":            "I noticed this role on the Cyberpark (Kozhikode) careers portal",
 }
 
 _COVER_TEMPLATE = """\

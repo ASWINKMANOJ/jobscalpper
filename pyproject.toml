@@ -17,8 +17,7 @@ dependencies = [
 
 [project.scripts]
 jobscraper = "cli_entry:main"
-jobscalpper = "cli_entry:main"
 
 [tool.setuptools]
-py-modules = ["cli_entry", "job_scraper", "job_scalpper"]
+py-modules = ["cli_entry", "job_scraper"]
 packages = ["db", "apply", "web"]

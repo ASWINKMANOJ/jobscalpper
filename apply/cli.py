@@ -52,6 +52,77 @@ def _print_item(item: dict) -> None:
     print(f"  url      : {item.get('url', '-')}")
 
 
+def prepare_single_job(job: dict, session=None) -> dict:
+    """
+    Prepare an application for a single job dictionary (hash, title, url, park).
+    Returns the prepared application dict, or raises ValueError if skipped.
+    """
+    title    = job["title"]
+    url      = job["url"]
+    park     = job["park"]
+    job_hash = job["hash"]
+    app_id   = make_application_id(park, url)
+    PENDING_DIR.mkdir(parents=True, exist_ok=True)
+
+    try:
+        details = fetch_job_details(url, session=session)
+    except Exception as exc:
+        raise ValueError(f"Fetch error: {exc}") from exc
+
+    email = details.get("email")
+    if not email:
+        raise ValueError("No usable hiring email found")
+
+    description = (details.get("description") or "")
+    company     = (details.get("company") or "")
+    category    = detect_category(title, description)
+
+    category_pdf = RESUME_DIR / f"{RESUME_PREFIX}_{category}.pdf"
+    if category_pdf.exists():
+        pdf_path = str(category_pdf)
+        tex_path = ""
+        skills   = matched_skills(description, title)
+    else:
+        if not RESUME_TEMPLATE.exists():
+            raise ValueError(f"No PDF for category '{category}' and no template")
+        app_dir  = PENDING_DIR / app_id
+        app_dir.mkdir(parents=True, exist_ok=True)
+        tex_file = app_dir / "resume.tex"
+        skills = write_tailored_tex(
+            RESUME_TEMPLATE, tex_file,
+            title=title, company=company, description=description,
+        )
+        try:
+            compiled  = compile_pdf(tex_file, app_dir)
+            final_pdf = app_dir / f"{APPLICANT_NAME.replace(' ', '_')}_Resume.pdf"
+            if compiled != final_pdf:
+                shutil.copy2(compiled, final_pdf)
+            pdf_path = str(final_pdf)
+            tex_path = str(tex_file)
+        except Exception as exc:
+            raise ValueError(f"PDF compilation error: {exc}") from exc
+
+    item: dict = {
+        "id":            app_id,
+        "job_hash":      job_hash,
+        "status":        "pending",
+        "category":      category,
+        "title":         title,
+        "park":          park,
+        "url":           url,
+        "email":         email,
+        "company":       company,
+        "description":   description[:600],
+        "matched_skills": skills,
+        "tex_path":      tex_path,
+        "pdf_path":      pdf_path,
+        "cover_letter":  "",
+    }
+    item["cover_letter"] = build_cover_letter(item)
+    store.upsert_application(item)
+    return item
+
+
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
@@ -72,96 +143,17 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     prepared: list[dict] = []
     skipped:  list[dict] = []
 
-    PENDING_DIR.mkdir(parents=True, exist_ok=True)
-
     for index, job in enumerate(new_jobs, start=1):
-        title    = job["title"]
-        url      = job["url"]
-        park     = job["park"]
-        job_hash = job["hash"]
-        app_id   = make_application_id(park, url)
+        title = job["title"]
         print(f"({index}/{len(new_jobs)}) {title}")
-
-        # ── Fetch JD ──────────────────────────────────────────────────────
         try:
-            details = fetch_job_details(url, session=session)
-        except Exception as exc:  # noqa: BLE001
-            skipped.append({"title": title, "url": url, "reason": str(exc)})
-            print(f"  skip – fetch error: {exc}")
-            continue
-
-        email = details.get("email")
-        if not email:
-            skipped.append({"title": title, "url": url, "reason": "no usable email"})
-            print("  skip – no usable hiring email")
-            continue
-
-        description = (details.get("description") or "")
-        company     = (details.get("company") or "")
-
-        # ── Category detection ────────────────────────────────────────────
-        category = detect_category(title, description)
-
-        # ── Resolve PDF ───────────────────────────────────────────────────
-        category_pdf = RESUME_DIR / f"{RESUME_PREFIX}_{category}.pdf"
-        if category_pdf.exists():
-            # Use the user-provided, category-specific PDF directly.
-            pdf_path = str(category_pdf)
-            tex_path = ""
-            skills   = matched_skills(description, title)
-            print(f"  category: {category}  (pre-made PDF)")
-        else:
-            # Fall back: tailor from LaTeX template and compile.
-            if not RESUME_TEMPLATE.exists():
-                skipped.append({
-                    "title": title, "url": url,
-                    "reason": f"no PDF at {category_pdf} and no resume template",
-                })
-                print(f"  skip – no PDF for category '{category}'")
-                continue
-
-            app_dir  = PENDING_DIR / app_id
-            app_dir.mkdir(parents=True, exist_ok=True)
-            tex_file = app_dir / "resume.tex"
-
-            skills = write_tailored_tex(
-                RESUME_TEMPLATE, tex_file,
-                title=title, company=company, description=description,
-            )
-            try:
-                compiled  = compile_pdf(tex_file, app_dir)
-                final_pdf = app_dir / f"{APPLICANT_NAME.replace(' ', '_')}_Resume.pdf"
-                if compiled != final_pdf:
-                    shutil.copy2(compiled, final_pdf)
-                pdf_path = str(final_pdf)
-                tex_path = str(tex_file)
-                print(f"  category: {category}  (compiled PDF)")
-            except Exception as exc:  # noqa: BLE001
-                skipped.append({"title": title, "url": url, "reason": f"pdf: {exc}"})
-                print(f"  skip – PDF compilation error: {exc}")
-                continue
-
-        # ── Build cover letter & save ─────────────────────────────────────
-        item: dict = {
-            "id":            app_id,
-            "job_hash":      job_hash,
-            "status":        "pending",
-            "category":      category,
-            "title":         title,
-            "park":          park,
-            "url":           url,
-            "email":         email,
-            "company":       company,
-            "description":   description[:600],
-            "matched_skills": skills,
-            "tex_path":      tex_path,
-            "pdf_path":      pdf_path,
-            "cover_letter":  "",
-        }
-        item["cover_letter"] = build_cover_letter(item)
-        store.upsert_application(item)
-        prepared.append(item)
-        print(f"  queued  → {email} | skills={skills[:4]}")
+            item = prepare_single_job(job, session=session)
+            prepared.append(item)
+            skills = item.get("matched_skills") or []
+            print(f"  queued  → {item['email']} | skills={skills[:4]}")
+        except ValueError as exc:
+            skipped.append({"title": title, "url": job["url"], "reason": str(exc)})
+            print(f"  skip – {exc}")
 
     print(f"\nPrepared {len(prepared)} application(s).")
     print(f"Skipped  {len(skipped)}.")

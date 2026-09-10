@@ -57,7 +57,7 @@ function OnboardingGuide() {
           {
             n: 4,
             title: 'Enter credentials below',
-            body: <>Paste your Gmail address and the 16-character app password into the form below, then click <strong>Save Configuration</strong>.</>,
+            body: <>Paste your Gmail address and the 16-character app password into the form below, then click <strong>Save All Settings</strong>.</>,
           },
         ].map(step => (
           <div key={step.n} className="onboarding-step">
@@ -82,6 +82,7 @@ export default function Settings() {
   const [testing, setTesting]   = useState(false)
   const [testResult, setTestResult] = useState(null)
   const [hasCredentials, setHasCredentials] = useState(false)
+  const [dirty, setDirty]       = useState(false)
   const toast = useToast()
 
   const load = async () => {
@@ -92,12 +93,12 @@ export default function Settings() {
       setConfig(d)
       setHasCredentials(d.has_credentials || false)
       setScrapePages(parseInt(d.SCRAPE_PAGES, 10) || 15)
-      // Initialise form — clear password placeholder
       const f = {}
       FIELDS.forEach(field => {
         f[field.key] = field.sensitive ? '' : (d[field.key] || '')
       })
       setForm(f)
+      setDirty(false)
     } catch {
       toast.error('Failed to load configuration')
     } finally {
@@ -106,6 +107,8 @@ export default function Settings() {
   }
 
   useEffect(() => { load() }, [])
+
+  const markDirty = () => setDirty(true)
 
   const handleSave = async () => {
     setSaving(true)
@@ -196,7 +199,7 @@ export default function Settings() {
                       : field.placeholder
                     }
                     value={form[field.key] || ''}
-                    onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    onChange={e => { setForm(prev => ({ ...prev, [field.key]: e.target.value })); markDirty() }}
                     autoComplete={field.sensitive ? 'new-password' : 'off'}
                   />
                   <p style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{field.help}</p>
@@ -211,13 +214,6 @@ export default function Settings() {
               )}
 
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? <><div className="spinner" style={{ borderTopColor: 'var(--bg)' }} /> Saving…</> : 'Save Configuration'}
-                </button>
                 <button
                   className="btn btn-secondary"
                   onClick={handleTest}
@@ -249,7 +245,7 @@ export default function Settings() {
                     max="100"
                     step="1"
                     value={scrapePages}
-                    onChange={e => setScrapePages(parseInt(e.target.value, 10))}
+                    onChange={e => { setScrapePages(parseInt(e.target.value, 10)); markDirty() }}
                     style={{
                       flex: 1,
                       height: 4,
@@ -268,7 +264,7 @@ export default function Settings() {
                     value={scrapePages}
                     onChange={e => {
                       const v = parseInt(e.target.value, 10)
-                      if (!isNaN(v)) setScrapePages(Math.max(1, Math.min(100, v)))
+                      if (!isNaN(v)) { setScrapePages(Math.max(1, Math.min(100, v))); markDirty() }
                     }}
                     className="input"
                     style={{ width: 72, textAlign: 'center' }}
@@ -283,17 +279,19 @@ export default function Settings() {
                   {scrapePages > 50 && <span style={{ color: 'var(--rejected)' }}> — Exhaustive (may be slow)</span>}
                 </p>
               </div>
-
-              <div style={{ marginTop: 8 }}>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? <><div className="spinner" style={{ borderTopColor: 'var(--bg)' }} /> Saving…</> : 'Save Configuration'}
-                </button>
-              </div>
             </div>
+          </div>
+
+          {/* Consolidated Save Bar */}
+          <div className="save-bar">
+            <button
+              className="btn btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? <><div className="spinner" style={{ borderTopColor: 'var(--bg)' }} /> Saving…</> : 'Save All Settings'}
+            </button>
+            {dirty && <span style={{ fontSize: 12, color: 'var(--pending)' }}>● Unsaved changes</span>}
           </div>
 
           {/* Info section */}

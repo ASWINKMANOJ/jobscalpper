@@ -103,6 +103,50 @@ def get_new_jobs() -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def get_unapplied_jobs(limit: int = 50) -> list[dict]:
+    """
+    Return jobs that are either brand new (no application created yet)
+    or have pending/approved applications (i.e. NOT rejected and NOT sent).
+    """
+    with _conn() as con:
+        rows = con.execute(
+            """
+            SELECT j.*,
+                   a.status   AS app_status,
+                   a.id       AS app_id,
+                   a.category AS app_category,
+                   a.company  AS app_company,
+                   a.email    AS app_email
+            FROM jobs j
+            LEFT JOIN applications a ON a.job_hash = j.hash
+            WHERE a.status IS NULL OR a.status IN ('pending', 'approved')
+            ORDER BY j.scraped_at DESC
+            LIMIT ?
+            """,
+            (limit,)
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_job_by_hash(job_hash: str) -> dict | None:
+    """Fetch a single job by its hash, including any application status."""
+    with _conn() as con:
+        row = con.execute(
+            """
+            SELECT j.*,
+                   a.status   AS app_status,
+                   a.id       AS app_id,
+                   a.category AS app_category
+            FROM jobs j
+            LEFT JOIN applications a ON a.job_hash = j.hash
+            WHERE j.hash = ?
+            """,
+            (job_hash,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+
 def get_jobs_paginated(
     park: str = "",
     search: str = "",
@@ -249,27 +293,19 @@ def set_status(app_ids: list[str], status: str) -> list[dict]:
     if status not in _VALID_STATUSES:
         raise ValueError(f"Invalid status {status!r}; must be one of {_VALID_STATUSES}")
 
-    # Map status → (SQL template, needs timestamp param).
-    # Column names are literal strings here — never interpolated from user input.
     _STATUS_SQL = {
-        "approved": ("UPDATE applications SET status = ?, approved_at = ? WHERE id = ?", True),
-        "rejected": ("UPDATE applications SET status = ?, rejected_at = ? WHERE id = ?", True),
-        "sent":     ("UPDATE applications SET status = ?, sent_at = ? WHERE id = ?",     True),
-        "pending":  ("UPDATE applications SET status = ?, created_at = ? WHERE id = ?",  True),
+        "approved": "UPDATE applications SET status = ?, approved_at = ? WHERE id = ?",
+        "rejected": "UPDATE applications SET status = ?, rejected_at = ? WHERE id = ?",
+        "sent":     "UPDATE applications SET status = ?, sent_at = ? WHERE id = ?",
+        "pending":  "UPDATE applications SET status = ?, created_at = ? WHERE id = ?",
     }
 
-    sql, needs_ts = _STATUS_SQL[status]
+    sql = _STATUS_SQL[status]
     now = _now()
     updated: list[dict] = []
     with _conn() as con:
         for app_id in app_ids:
-            if needs_ts:
-                con.execute(sql, (status, now, app_id))
-            else:
-                con.execute(
-                    "UPDATE applications SET status = ? WHERE id = ?",
-                    (status, app_id),
-                )
+            con.execute(sql, (status, now, app_id))
             row = con.execute(
                 "SELECT * FROM applications WHERE id = ?", (app_id,)
             ).fetchone()

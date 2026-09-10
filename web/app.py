@@ -82,19 +82,14 @@ def _run_scrape() -> None:
         _scrape_status.clear()
         _scrape_status.update({"running": True, "message": "Scraping portals…", "log": ["Starting scrape..."]})
 
-    # Attach handlers to capture scraper log output (both jobscraper and jobscalpper)
-    scrape_loggers = [logging.getLogger("jobscraper"), logging.getLogger("jobscalpper")]
+    scrape_logger = logging.getLogger("jobscraper")
     handler = _LogCapture()
     handler.setFormatter(logging.Formatter("%(message)s"))
-    for lgr in scrape_loggers:
-        lgr.addHandler(handler)
-        lgr.setLevel(logging.INFO)
+    scrape_logger.addHandler(handler)
+    scrape_logger.setLevel(logging.INFO)
 
     try:
-        try:
-            from job_scraper import main as _scrape_main
-        except ImportError:
-            from job_scalpper import main as _scrape_main
+        from job_scraper import main as _scrape_main
 
         # Read configurable page count from .env
         env = _read_env()
@@ -113,8 +108,7 @@ def _run_scrape() -> None:
             _scrape_status["message"] = f"Error: {exc}"
             _scrape_status["log"].append(f"Error: {exc}")
     finally:
-        for lgr in scrape_loggers:
-            lgr.removeHandler(handler)
+        scrape_logger.removeHandler(handler)
 
 
 # ── SPA catch-all (serve React app) ──────────────────────────────────────
@@ -160,6 +154,52 @@ def api_jobs():
         "per_page": per_page,
         "total_pages": total_pages,
         "parks": parks,
+    })
+
+
+@app.route("/api/jobs/unapplied")
+def api_jobs_unapplied():
+    limit = request.args.get("limit", 100, type=int)
+    unapplied_jobs = store.get_unapplied_jobs(limit=limit)
+    return jsonify({"jobs": unapplied_jobs, "count": len(unapplied_jobs)})
+
+
+@app.route("/api/jobs/<job_hash>/prepare", methods=["POST"])
+def api_job_prepare(job_hash: str):
+    job = store.get_job_by_hash(job_hash)
+    if not job:
+        return jsonify({"ok": False, "error": "Job not found"}), 404
+    try:
+        from apply.cli import prepare_single_job
+        app_item = prepare_single_job(job)
+        return jsonify({"ok": True, "application": app_item})
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"Unexpected error: {exc}"}), 500
+
+
+@app.route("/api/jobs/prepare-all", methods=["POST"])
+def api_jobs_prepare_all():
+    new_jobs = store.get_new_jobs()
+    if not new_jobs:
+        return jsonify({"ok": True, "prepared_count": 0, "message": "No new jobs to prepare"})
+
+    from apply.cli import prepare_single_job
+    prepared = []
+    failed = []
+    for j in new_jobs:
+        try:
+            item = prepare_single_job(j)
+            prepared.append(item["id"])
+        except Exception as exc:
+            failed.append({"hash": j["hash"], "title": j["title"], "error": str(exc)})
+
+    return jsonify({
+        "ok": True,
+        "prepared_count": len(prepared),
+        "failed_count": len(failed),
+        "failed": failed,
     })
 
 
@@ -214,6 +254,98 @@ def api_cover_letter(app_id: str):
     if not item:
         return jsonify({"ok": False, "error": "Not found"}), 404
     return jsonify({"ok": True, "cover_letter": item.get("cover_letter", "")})
+
+
+# ── API: Batch Application Actions ─────────────────────────────────────────
+
+@app.route("/api/applications/batch/approve", methods=["POST"])
+def api_batch_approve():
+    data = request.get_json(silent=True) or {}
+    ids = data.get("ids", [])
+    if not ids:
+        return jsonify({"ok": False, "error": "No IDs provided"}), 400
+    updated = store.set_status(ids, "approved")
+    return jsonify({"ok": True, "count": len(updated)})
+
+
+@app.route("/api/applications/batch/reject", methods=["POST"])
+def api_batch_reject():
+    data = request.get_json(silent=True) or {}
+    ids = data.get("ids", [])
+    if not ids:
+        return jsonify({"ok": False, "error": "No IDs provided"}), 400
+    updated = store.set_status(ids, "rejected")
+    return jsonify({"ok": True, "count": len(updated)})
+
+
+@app.route("/api/applications/batch/send", methods=["POST"])
+def api_batch_send():
+    data = request.get_json(silent=True) or {}
+    ids = data.get("ids", [])
+    dry_run = bool(data.get("dry_run", False))
+    if not ids:
+        return jsonify({"ok": False, "error": "No IDs provided"}), 400
+
+    from apply.mailer import send_application_email
+    sent = []
+    failed = []
+    for app_id in ids:
+        item = store.get_application(app_id)
+        if not item:
+            failed.append({"id": app_id, "error": "Not found"})
+            continue
+        if item["status"] != "approved" and not dry_run:
+            failed.append({"id": app_id, "error": "Not approved"})
+            continue
+        try:
+            result = send_application_email(item, dry_run=dry_run)
+            if not dry_run:
+                store.set_status([app_id], "sent")
+            sent.append(app_id)
+        except Exception as exc:
+            failed.append({"id": app_id, "error": str(exc)})
+
+    return jsonify({
+        "ok": True,
+        "sent_count": len(sent),
+        "failed_count": len(failed),
+        "failed": failed,
+    })
+
+
+@app.route("/api/applications/approve-all-pending", methods=["POST"])
+def api_approve_all_pending():
+    pending = store.load_applications(status="pending")
+    if not pending:
+        return jsonify({"ok": True, "count": 0, "message": "No pending applications"})
+    ids = [a["id"] for a in pending]
+    updated = store.set_status(ids, "approved")
+    return jsonify({"ok": True, "count": len(updated)})
+
+
+@app.route("/api/applications/send-all-approved", methods=["POST"])
+def api_send_all_approved():
+    approved = store.load_applications(status="approved")
+    if not approved:
+        return jsonify({"ok": True, "sent_count": 0, "message": "No approved applications"})
+
+    from apply.mailer import send_application_email
+    sent = []
+    failed = []
+    for item in approved:
+        try:
+            send_application_email(item, dry_run=False)
+            store.set_status([item["id"]], "sent")
+            sent.append(item["id"])
+        except Exception as exc:
+            failed.append({"id": item["id"], "error": str(exc)})
+
+    return jsonify({
+        "ok": True,
+        "sent_count": len(sent),
+        "failed_count": len(failed),
+        "failed": failed,
+    })
 
 
 # ── API: Scrape ────────────────────────────────────────────────────────────

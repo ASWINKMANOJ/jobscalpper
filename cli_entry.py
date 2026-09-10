@@ -135,12 +135,8 @@ def cmd_up(args: argparse.Namespace) -> int:
 
 def cmd_scrape(args: argparse.Namespace) -> int:
     """Run the job scraper."""
-    # Import here so we only load dependencies when needed
     sys.path.insert(0, str(ROOT))
-    try:
-        from job_scraper import main as scrape_main
-    except ImportError:
-        from job_scalpper import main as scrape_main
+    from job_scraper import main as scrape_main
     scrape_main()
     return 0
 

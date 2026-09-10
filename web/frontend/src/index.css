@@ -1056,6 +1056,37 @@ td {
   align-items: center;
 }
 
+/* ── Tab Pills ───────────────────────────────────────────────── */
+.tab-pill-group {
+  display: flex;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+
+.tab-pill {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.tab-pill:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.tab-pill.active {
+  color: var(--accent);
+  background: var(--surface-active);
+  font-weight: 600;
+}
+
 /* ── Park pill ────────────────────────────────────────────────── */
 .park-pill {
   font-size: 11px;
@@ -1122,10 +1153,150 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Batch Action Toolbar ─────────────────────────────────────── */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm);
+}
+
+.batch-bar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.batch-bar-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* ── Row Checkbox ─────────────────────────────────────────────── */
+.row-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.row-checkbox {
+  width: 15px;
+  height: 15px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid var(--border-bright);
+  border-radius: 3px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.row-checkbox:checked {
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.row-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3.5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.row-checkbox:hover {
+  border-color: var(--text-dim);
+}
+
+.row-selected {
+  background: var(--surface-active) !important;
+}
+
+/* ── Confirm Modal ────────────────────────────────────────────── */
+.confirm-modal {
+  max-width: 440px;
+}
+
+/* ── Save Bar ─────────────────────────────────────────────────── */
+.save-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* ── Mobile Header ────────────────────────────────────────────── */
+.mobile-header {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.mobile-nav {
+  width: 240px;
+  height: 100%;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  padding: 16px 14px;
+  overflow-y: auto;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .sidebar { display: none; }
+  .mobile-header { display: flex; }
+  .mobile-nav-overlay { display: block; }
   .main-content { width: 100%; }
   .page { padding: 20px 16px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .batch-bar { flex-wrap: wrap; }
+  .batch-bar-actions { margin-left: 0; width: 100%; }
+}
+
+@media (min-width: 901px) {
+  .mobile-header { display: none !important; }
+  .mobile-nav-overlay { display: none !important; }
 }

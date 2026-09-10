@@ -70,7 +70,15 @@ INCLUDED_KEYWORDS = [
     "mern",
     "mean",
     "vue",
+    "vuejs",
     "go",
+    "flutter",
+    "svelte",
+    "rust",
+    "graphql",
+    "postgresql",
+    "postgres",
+    "sdet",
 ]
 
 EXCLUDED_KEYWORDS = [
@@ -116,6 +124,7 @@ _TITLE_ALIASES = [
     (re.compile(r"\bnode\.?\s*js\b"), "nodejs"),
     (re.compile(r"\bnext\.?\s*js\b"), "nextjs"),
     (re.compile(r"\breact\.?\s*js\b"), "reactjs"),
+    (re.compile(r"\bvue\.?\s*js\b"), "vuejs"),
     (re.compile(r"\breact\s*native\b"), "reactnative"),
     (re.compile(r"\bfull[\s\-]*stack\b"), "fullstack"),
     (re.compile(r"\bback[\s\-]*end\b"), "backend"),
@@ -123,11 +132,15 @@ _TITLE_ALIASES = [
     (re.compile(r"\bdev[\s\-]*ops\b"), "devops"),
     (re.compile(r"\bgo[\s\-]*lang\b"), "golang"),
     (re.compile(r"\bjava\s*script\b"), "javascript"),
+    (re.compile(r"\bpostgre\s*sql\b"), "postgresql"),
+    (re.compile(r"\bpostgres\b"), "postgresql"),
 ]
 
 PORTALS = {
     "Technopark (Trivandrum)": "https://technopark.in/job-search",
     "Infopark (Kochi)": "https://infopark.in/companies-job",
+    "Infopark (Thrissur)": "https://infopark.in/companies-job/infopark-thrissur",
+    "Infopark (Cherthala)": "https://infopark.in/companies-job/infopark-cherthala",
     "UL Cyberpark (Kozhikode)": "https://www.ulcyberpark.com/jobs",
 }
 
@@ -336,18 +349,20 @@ def scrape_technopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MA
     return _dedupe_jobs(jobs)
 
 
-def scrape_infopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MAX_PAGES):
-    """Walk Infopark pagination (companies-job?page=N), at least min_pages."""
+def scrape_infopark(park_name, url=None, session=None, min_pages=MIN_PAGES, max_pages=MAX_PAGES):
+    """Walk Infopark pagination (companies-job?page=N), supporting subcampus URLs."""
     http = session or requests
     jobs = []
     page = 1
-    pages_needed = min_pages
+    base_url = url or INFOPARK_JOBS_URL
+    is_subcampus = "infopark-" in base_url
+    pages_needed = 1 if is_subcampus else min_pages
     empty_streak = 0
 
     while page <= pages_needed and page <= max_pages:
         log.info("  page %d/%d...", page, pages_needed)
         response = http.get(
-            INFOPARK_JOBS_URL,
+            base_url,
             params={"page": page},
             headers=HEADERS,
             timeout=15,
@@ -359,15 +374,15 @@ def scrape_infopark(park_name, session=None, min_pages=MIN_PAGES, max_pages=MAX_
         soup = BeautifulSoup(response.text, "html.parser")
         page_numbers = []
         for a_tag in soup.find_all("a", href=True):
-            if "companies-job" in a_tag["href"] and a_tag.get_text(strip=True).isdigit():
+            if ("companies-job" in a_tag["href"] or "page=" in a_tag["href"]) and a_tag.get_text(strip=True).isdigit():
                 page_numbers.append(int(a_tag.get_text(strip=True)))
         if page_numbers:
-            pages_needed = max(max(page_numbers), min_pages)
+            pages_needed = max(max(page_numbers), pages_needed)
 
         row_count = len(soup.select("table tr"))
         if row_count <= 1:
             empty_streak += 1
-            if empty_streak >= 2 and page >= min_pages:
+            if is_subcampus or (empty_streak >= 2 and page >= min_pages):
                 break
         else:
             empty_streak = 0
@@ -388,7 +403,7 @@ def scrape_portal(park_name, url, session=None, min_pages=MIN_PAGES, max_pages=M
             return scrape_technopark(park_name, session=http,
                                      min_pages=min_pages, max_pages=max_pages)
         if "infopark.in" in url:
-            return scrape_infopark(park_name, session=http,
+            return scrape_infopark(park_name, url=url, session=http,
                                    min_pages=min_pages, max_pages=max_pages)
 
         response = http.get(url, headers=HEADERS, timeout=15)

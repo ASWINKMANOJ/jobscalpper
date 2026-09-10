@@ -52,6 +52,19 @@ const icons = {
       <path d="M9 1L2 9h6l-1 6 7-8H8l1-6z" />
     </svg>
   ),
+  menu: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <line x1="2" y1="4" x2="14" y2="4" />
+      <line x1="2" y1="8" x2="14" y2="8" />
+      <line x1="2" y1="12" x2="14" y2="12" />
+    </svg>
+  ),
+  close: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <line x1="3" y1="3" x2="13" y2="13" />
+      <line x1="13" y1="3" x2="3" y2="13" />
+    </svg>
+  ),
 }
 
 const navItems = [
@@ -70,6 +83,7 @@ const pageVariants = {
 
 export default function App() {
   const [scrapeRunning, setScrapeRunning] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   // Poll scrape status globally
   useEffect(() => {
@@ -85,9 +99,47 @@ export default function App() {
     return () => clearInterval(id)
   }, [])
 
+  // Close mobile nav on route change
+  const closeMobileNav = () => setMobileNavOpen(false)
+
   return (
     <ToastProvider>
       <div className="app-layout">
+        {/* Mobile header */}
+        <header className="mobile-header">
+          <button className="mobile-menu-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+            <span className="nav-icon">{mobileNavOpen ? icons.close : icons.menu}</span>
+          </button>
+          <div className="logo" style={{ padding: 0 }}>
+            <div className="logo-mark">{icons.bolt}</div>
+            <span className="logo-name">JobScraper</span>
+          </div>
+          {scrapeRunning && <span className="pulse-dot" style={{ width: 6, height: 6, marginLeft: 'auto' }} />}
+        </header>
+
+        {/* Mobile nav overlay */}
+        {mobileNavOpen && (
+          <div className="mobile-nav-overlay" onClick={closeMobileNav}>
+            <nav className="mobile-nav" onClick={e => e.stopPropagation()}>
+              <ul className="nav-list" style={{ padding: '16px 0' }}>
+                {navItems.map(item => (
+                  <li key={item.path}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === '/'}
+                      className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                      onClick={closeMobileNav}
+                    >
+                      <span className="nav-icon">{icons[item.icon]}</span>
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        )}
+
         {/* Sidebar */}
         <nav className="sidebar">
           <div className="logo">
@@ -124,7 +176,7 @@ export default function App() {
               color: 'var(--text-muted)',
               padding: '0 10px',
             }}>
-              Kerala IT Parks
+              Kerala Tech Hubs (5 Campuses)
             </div>
           </div>
         </nav>

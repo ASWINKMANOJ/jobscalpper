@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { useToast } from '../components/Toast.jsx'
+import CoverLetterModal from '../components/CoverLetterModal.jsx'
+import ConfirmModal from '../components/ConfirmModal.jsx'
 
 const TABS = [
   { value: '', label: 'All' },
@@ -10,53 +12,7 @@ const TABS = [
   { value: 'rejected', label: 'Rejected' },
 ]
 
-function CoverLetterModal({ appId, title, onClose }) {
-  const [content, setContent] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch(`/api/applications/${appId}/cover_letter`)
-      .then(r => r.json())
-      .then(d => { setContent(d.cover_letter || '— No cover letter —'); setLoading(false) })
-      .catch(() => { setContent('Failed to load.'); setLoading(false) })
-  }, [appId])
-
-  return (
-    <motion.div
-      className="modal-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={e => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        className="modal"
-        initial={{ scale: 0.95, y: 16 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.96, y: 8 }}
-        transition={{ duration: 0.18 }}
-      >
-        <div className="modal-header">
-          <span className="modal-title">Cover Letter</span>
-          <button className="modal-close" onClick={onClose}>✕</button>
-        </div>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{title}</p>
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
-            <div className="spinner spinner-lg" />
-          </div>
-        ) : (
-          <pre>{content}</pre>
-        )}
-        <div className="modal-footer">
-          <button className="btn btn-ghost" onClick={onClose}>Close</button>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-function AppRow({ app, onAction, index = 0 }) {
+function AppRow({ app, onAction, selected, onSelect }) {
   const [busy, setBusy] = useState(null)
   const [showCover, setShowCover] = useState(false)
   const toast = useToast()
@@ -86,7 +42,17 @@ function AppRow({ app, onAction, index = 0 }) {
 
   return (
     <>
-      <tr>
+      <tr className={selected ? 'row-selected' : ''}>
+        <td style={{ width: 36, paddingRight: 0 }}>
+          <label className="row-checkbox-label">
+            <input
+              type="checkbox"
+              className="row-checkbox"
+              checked={selected}
+              onChange={() => onSelect(app.id)}
+            />
+          </label>
+        </td>
         <td>
           <div className="td-title">
             <a href={app.url} target="_blank" rel="noopener noreferrer">{app.title}</a>
@@ -155,7 +121,7 @@ function AppRow({ app, onAction, index = 0 }) {
 function SkeletonRows({ n = 6 }) {
   return Array(n).fill(0).map((_, i) => (
     <tr key={i}>
-      <td colSpan={5}>
+      <td colSpan={6}>
         <div className="skeleton skeleton-text" style={{ width: `${50 + Math.random() * 40}%` }} />
       </td>
     </tr>
@@ -167,6 +133,9 @@ export default function Applications() {
   const [appList, setAppList] = useState([])
   const [counts, setCounts] = useState({})
   const [loading, setLoading] = useState(true)
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [batchBusy, setBatchBusy] = useState(null)
+  const [confirmModal, setConfirmModal] = useState(null)
   const toast = useToast()
 
   const load = async (status = tab) => {
@@ -178,6 +147,7 @@ export default function Applications() {
       const d = await r.json()
       setAppList(d.applications || [])
       setCounts(d.counts || {})
+      setSelectedIds(new Set())
     } catch {
       toast.error('Failed to load applications')
     } finally {
@@ -188,7 +158,6 @@ export default function Applications() {
   useEffect(() => { load() }, [tab])
 
   const handleAction = (id, newStatus) => {
-    // Remove from list if filtering by a specific status and status changed
     if (tab && newStatus !== tab) {
       setAppList(prev => prev.filter(a => a.id !== id))
     } else {
@@ -197,13 +166,128 @@ export default function Applications() {
     load(tab)
   }
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === appList.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(appList.map(a => a.id)))
+    }
+  }
+
+  // Derive what batch actions are available based on selection
+  const selectedApps = useMemo(() =>
+    appList.filter(a => selectedIds.has(a.id)),
+  [appList, selectedIds])
+
+  const selectedPending = selectedApps.filter(a => a.status === 'pending')
+  const selectedApproved = selectedApps.filter(a => a.status === 'approved')
+
+  const doBatchAction = async (action, ids) => {
+    setBatchBusy(action)
+    try {
+      const r = await fetch(`/api/applications/batch/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+      const d = await r.json()
+      if (d.ok) {
+        const label = action === 'send' ? 'sent' : `${action}d`
+        toast.success(`${d.count || d.sent_count || ids.length} application(s) ${label}`)
+        await load(tab)
+      } else {
+        toast.error(d.error || `Batch ${action} failed`)
+      }
+    } catch {
+      toast.error('Network error')
+    } finally {
+      setBatchBusy(null)
+      setConfirmModal(null)
+    }
+  }
+
+  const handleApproveAllPending = async () => {
+    setBatchBusy('approve-all')
+    try {
+      const r = await fetch('/api/applications/approve-all-pending', { method: 'POST' })
+      const d = await r.json()
+      if (d.ok) {
+        toast.success(`${d.count} application(s) approved`)
+        await load(tab)
+      } else {
+        toast.error(d.message || 'Failed')
+      }
+    } catch {
+      toast.error('Network error')
+    } finally {
+      setBatchBusy(null)
+    }
+  }
+
+  const handleSendAllApproved = async () => {
+    setBatchBusy('send-all')
+    try {
+      const r = await fetch('/api/applications/send-all-approved', { method: 'POST' })
+      const d = await r.json()
+      if (d.ok) {
+        toast.success(`${d.sent_count} application(s) sent`)
+        if (d.failed_count > 0) toast.error(`${d.failed_count} failed to send`)
+        await load(tab)
+      } else {
+        toast.error(d.message || 'Failed')
+      }
+    } catch {
+      toast.error('Network error')
+    } finally {
+      setBatchBusy(null)
+      setConfirmModal(null)
+    }
+  }
+
+  const totalCount = Object.values(counts).reduce((a, b) => a + b, 0)
+
   return (
     <div className="page">
-      <div className="page-header">
-        <h1 className="page-title">Applications</h1>
-        <p className="page-subtitle">
-          {Object.values(counts).reduce((a, b) => a + b, 0)} total applications
-        </p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 className="page-title">Applications</h1>
+          <p className="page-subtitle">{totalCount} total applications</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {(counts.pending || 0) > 0 && (
+            <button
+              className="btn btn-approve btn-sm"
+              disabled={!!batchBusy}
+              onClick={handleApproveAllPending}
+            >
+              {batchBusy === 'approve-all' ? <><div className="spinner" /> Approving…</> : `✓ Approve All Pending (${counts.pending})`}
+            </button>
+          )}
+          {(counts.approved || 0) > 0 && (
+            <button
+              className="btn btn-send btn-sm"
+              disabled={!!batchBusy}
+              onClick={() => setConfirmModal({
+                title: 'Send All Approved',
+                message: `This will send ${counts.approved} application email(s) to the respective companies. This action cannot be undone.`,
+                confirmLabel: `Send ${counts.approved} Email(s)`,
+                confirmClass: 'btn-send',
+                onConfirm: handleSendAllApproved,
+              })}
+            >
+              ↑ Send All Approved ({counts.approved})
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Status tabs */}
@@ -219,13 +303,67 @@ export default function Applications() {
               <span className="tab-count">{counts[t.value]}</span>
             )}
             {!t.value && (
-              <span className="tab-count">
-                {Object.values(counts).reduce((a, b) => a + b, 0)}
-              </span>
+              <span className="tab-count">{totalCount}</span>
             )}
           </button>
         ))}
       </div>
+
+      {/* Batch action toolbar */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <div className="batch-bar">
+            <span className="batch-bar-label">{selectedIds.size} selected</span>
+            <div className="batch-bar-actions">
+              {selectedPending.length > 0 && (
+                <>
+                  <button
+                    className="btn btn-approve btn-sm"
+                    disabled={!!batchBusy}
+                    onClick={() => doBatchAction('approve', selectedPending.map(a => a.id))}
+                  >
+                    {batchBusy === 'approve' ? <div className="spinner" /> : `✓ Approve (${selectedPending.length})`}
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    disabled={!!batchBusy}
+                    onClick={() => setConfirmModal({
+                      title: 'Reject Selected',
+                      message: `Reject ${selectedPending.length} pending application(s)?`,
+                      confirmLabel: `Reject ${selectedPending.length}`,
+                      confirmClass: 'btn-danger',
+                      onConfirm: () => doBatchAction('reject', selectedPending.map(a => a.id)),
+                    })}
+                  >
+                    ✕ Reject ({selectedPending.length})
+                  </button>
+                </>
+              )}
+              {selectedApproved.length > 0 && (
+                <button
+                  className="btn btn-send btn-sm"
+                  disabled={!!batchBusy}
+                  onClick={() => setConfirmModal({
+                    title: 'Send Selected',
+                    message: `Send ${selectedApproved.length} approved application(s) via email? This cannot be undone.`,
+                    confirmLabel: `Send ${selectedApproved.length} Email(s)`,
+                    confirmClass: 'btn-send',
+                    onConfirm: () => doBatchAction('send', selectedApproved.map(a => a.id)),
+                  })}
+                >
+                  ↑ Send ({selectedApproved.length})
+                </button>
+              )}
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Table */}
       <div className="card">
@@ -233,6 +371,17 @@ export default function Applications() {
           <table>
             <thead>
               <tr>
+                <th style={{ width: 36, paddingRight: 0 }}>
+                  <label className="row-checkbox-label">
+                    <input
+                      type="checkbox"
+                      className="row-checkbox"
+                      checked={appList.length > 0 && selectedIds.size === appList.length}
+                      onChange={toggleSelectAll}
+                      disabled={loading || appList.length === 0}
+                    />
+                  </label>
+                </th>
                 <th>Job Title</th>
                 <th>Park</th>
                 <th>Status</th>
@@ -245,7 +394,7 @@ export default function Applications() {
                 <SkeletonRows />
               ) : appList.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={6}>
                     <div className="empty-state" style={{ padding: '48px 24px' }}>
                       <div className="empty-title">No applications {tab ? `with status "${tab}"` : 'yet'}</div>
                       <p className="empty-desc">
@@ -258,14 +407,35 @@ export default function Applications() {
                   </td>
                 </tr>
               ) : (
-                appList.map((app, i) => (
-                  <AppRow key={app.id} app={app} onAction={handleAction} index={i} />
+                appList.map((app) => (
+                  <AppRow
+                    key={app.id}
+                    app={app}
+                    onAction={handleAction}
+                    selected={selectedIds.has(app.id)}
+                    onSelect={toggleSelect}
+                  />
                 ))
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <AnimatePresence>
+        {confirmModal && (
+          <ConfirmModal
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmLabel={confirmModal.confirmLabel}
+            confirmClass={confirmModal.confirmClass}
+            onConfirm={confirmModal.onConfirm}
+            onCancel={() => setConfirmModal(null)}
+            busy={!!batchBusy}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

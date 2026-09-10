@@ -146,14 +146,19 @@ export default function Scan() {
       </div>
 
       {/* Info cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginTop: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12, marginTop: 24 }}>
         {[
-          { title: 'Infopark',    desc: 'Kochi IT cluster' },
-          { title: 'Technopark',  desc: 'Thiruvananthapuram' },
-          { title: 'Cyberpark',   desc: 'Kozhikode' },
+          { title: 'Technopark',           desc: 'Thiruvananthapuram & Kollam', status: 'API-based' },
+          { title: 'Infopark Kochi',       desc: 'Kakkanad Phase 1 & 2',        status: 'Paginated' },
+          { title: 'Infopark Thrissur',    desc: 'Koratty IT cluster',          status: 'Campus' },
+          { title: 'Infopark Cherthala',   desc: 'Cherthala IT park',           status: 'Campus' },
+          { title: 'UL Cyberpark',         desc: 'Kozhikode (Calicut)',         status: 'HTML table' },
         ].map(p => (
           <div key={p.title} className="card" style={{ padding: '14px 16px' }}>
-            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{p.title}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{p.title}</div>
+              <span className="badge badge-new" style={{ fontSize: 10 }}>{p.status}</span>
+            </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.desc}</div>
           </div>
         ))}

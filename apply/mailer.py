@@ -14,7 +14,6 @@ from email.mime.text import MIMEText
 from pathlib import Path
 
 from .config import APPLICANT_NAME, GMAIL_ADDRESS, GMAIL_APP_PASSWORD, RESUME_DIR, RESUME_PREFIX
-from .cover import build_cover_letter  # noqa: F401 – re-exported for convenience
 
 
 def _resolve_pdf(item: dict) -> Path:

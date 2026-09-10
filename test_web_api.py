@@ -92,6 +92,16 @@ class TestJobsEndpoint(_APITestCase):
         data = resp.get_json()
         self.assertGreater(data["total"], 0)
 
+    def test_unapplied_jobs(self):
+        resp = self.client.get("/api/jobs/unapplied")
+        data = resp.get_json()
+        self.assertEqual(data["count"], 15)
+        # Mark one rejected
+        h = data["jobs"][0]["hash"]
+        store.upsert_application({"id": "app-x", "job_hash": h, "status": "rejected"})
+        resp2 = self.client.get("/api/jobs/unapplied")
+        self.assertEqual(resp2.get_json()["count"], 14)
+
 
 class TestApplicationsEndpoint(_APITestCase):
     def _insert_app(self, app_id, status="pending"):
@@ -211,6 +221,72 @@ class TestConfigEndpoints(_APITestCase):
         data = resp.get_json()
         if data.get("GMAIL_APP_PASSWORD"):
             self.assertEqual(data["GMAIL_APP_PASSWORD"], "••••••••••••••••")
+
+
+class TestBatchEndpoints(_APITestCase):
+    def setUp(self):
+        super().setUp()
+        store.upsert_application({
+            "id": "b1", "status": "pending",
+            "title": "Dev 1", "park": "Park", "url": "https://x/b1",
+            "email": "hr1@test.com", "company": "Co 1",
+        })
+        store.upsert_application({
+            "id": "b2", "status": "pending",
+            "title": "Dev 2", "park": "Park", "url": "https://x/b2",
+            "email": "hr2@test.com", "company": "Co 2",
+        })
+
+    def test_batch_approve(self):
+        resp = self.client.post("/api/applications/batch/approve", json={"ids": ["b1", "b2"]})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["count"], 2)
+        self.assertEqual(store.get_application("b1")["status"], "approved")
+        self.assertEqual(store.get_application("b2")["status"], "approved")
+
+    def test_batch_approve_no_ids(self):
+        resp = self.client.post("/api/applications/batch/approve", json={"ids": []})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_batch_reject(self):
+        resp = self.client.post("/api/applications/batch/reject", json={"ids": ["b1"]})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(store.get_application("b1")["status"], "rejected")
+
+    def test_approve_all_pending(self):
+        resp = self.client.post("/api/applications/approve-all-pending")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["count"], 2)
+        self.assertEqual(len(store.load_applications("approved")), 2)
+
+    @patch("apply.mailer.send_application_email")
+    def test_batch_send(self, mock_mailer):
+        mock_mailer.return_value = {"sent": True}
+        store.set_status(["b1"], "approved")
+        resp = self.client.post("/api/applications/batch/send", json={"ids": ["b1"]})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["sent_count"], 1)
+        self.assertEqual(store.get_application("b1")["status"], "sent")
+
+    @patch("apply.mailer.send_application_email")
+    def test_send_all_approved(self, mock_mailer):
+        mock_mailer.return_value = {"sent": True}
+        store.set_status(["b1", "b2"], "approved")
+        resp = self.client.post("/api/applications/send-all-approved")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["sent_count"], 2)
+        self.assertEqual(len(store.load_applications("sent")), 2)
 
 
 if __name__ == "__main__":
